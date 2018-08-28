@@ -1,0 +1,10 @@
+C:\Users\karen\Desktop\GitHub\ProyectoArchivos\Archivos\Archivos\bin\Debug\Archivos.exe.config
+C:\Users\karen\Desktop\GitHub\ProyectoArchivos\Archivos\Archivos\bin\Debug\Archivos.exe
+C:\Users\karen\Desktop\GitHub\ProyectoArchivos\Archivos\Archivos\bin\Debug\Archivos.pdb
+C:\Users\karen\Desktop\GitHub\ProyectoArchivos\Archivos\Archivos\obj\Debug\Archivos.csprojAssemblyReference.cache
+C:\Users\karen\Desktop\GitHub\ProyectoArchivos\Archivos\Archivos\obj\Debug\Archivos.Properties.Resources.resources
+C:\Users\karen\Desktop\GitHub\ProyectoArchivos\Archivos\Archivos\obj\Debug\Archivos.csproj.GenerateResource.cache
+C:\Users\karen\Desktop\GitHub\ProyectoArchivos\Archivos\Archivos\obj\Debug\Archivos.csproj.CoreCompileInputs.cache
+C:\Users\karen\Desktop\GitHub\ProyectoArchivos\Archivos\Archivos\obj\Debug\Archivos.exe
+C:\Users\karen\Desktop\GitHub\ProyectoArchivos\Archivos\Archivos\obj\Debug\Archivos.pdb
+C:\Users\karen\Desktop\GitHub\ProyectoArchivos\Archivos\Archivos\obj\Debug\Archivos.Proyecto.resources
