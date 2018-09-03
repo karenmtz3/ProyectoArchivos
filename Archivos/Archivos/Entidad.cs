@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Archivos
 {
-    class Entitad
+    class Entidad
     {
         string NombreEnt;
         long DirEnt, DirAtrib, DirDatos, DirSigEnt;
 
-        public void Entidad(string nombre, long DEnt, long DAtrib, long DDatos, long DSEnt)
+        public Entidad(string nombre, long DEnt, long DAtrib, long DDatos, long DSEnt)
         {
             NombreEnt = nombre;
             DirEnt = DEnt;
