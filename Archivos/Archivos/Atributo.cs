@@ -8,11 +8,11 @@ namespace Archivos
 {
     class Atributo
     {
-        int tam = 30;
-        string[] NombreAtrib;
-        long DirAtrib, DirIndice, DSAtrib;
-        char TipoDato;
-        int LongDato, TipoIndice;
+        private int tam = 30;
+        private string[] NombreAtrib;
+        private long DirAtrib, DirIndice, DSAtrib;
+        private char TipoDato;
+        private int LongDato, TipoIndice;
 
         public Atributo(string[] nombre, long DA, long DI, long DSA, char TD, int LD, int TI)
         {

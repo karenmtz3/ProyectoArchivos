@@ -4,26 +4,60 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.IO;
 
 namespace Archivos
 {
     class Entidad
     {
-        string NombreEnt;
-        long DirEnt, DirAtrib, DirDatos, DirSigEnt;
+        //private string NombreEnt;
+        private char[] Nombre = new char[30];
+        private long DirEnt;
+        private long DirAtrib;
+        private long DirDatos;
+        private long DirSigEnt;
 
-        public Entidad(string nombre, long DEnt, long DAtrib, long DDatos, long DSEnt)
+        public Entidad(long DEnt, long DAtrib, long DDatos, long DSEnt)
         {
-            NombreEnt = nombre;
             DirEnt = DEnt;
             DirAtrib = DAtrib;
             DirDatos = DDatos;
             DirSigEnt = DSEnt;
+            for (int i = 0; i < 30; i++)
+                Nombre[i] = '*';
+            // Nombre = nombre;
         }
-        public string SGnombre
+        public void AgregaEspacio(char[] nombre)
         {
-            set => NombreEnt = value;
-            get => NombreEnt;
+
+            for (int i = 0; i < 30; i++)
+            {
+                if (i < nombre.Length)
+                    Nombre[i] = nombre[i];
+                else
+                    break;
+            }
+            /*public string SGnombre
+            {
+                set => NombreEnt = value;
+                get => NombreEnt;
+            }*/
+        }
+
+        public void Guardar(BinaryWriter binaryWriter)
+        {
+            binaryWriter.Write(Nombre);
+            binaryWriter.Write(DirEnt);
+            binaryWriter.Write(DirAtrib);
+            binaryWriter.Write(DirDatos);
+            binaryWriter.Write(DirSigEnt);
+
+        }
+
+        public char[] nombreEnt
+        {
+            set => Nombre = value;
+            get => Nombre;
         }
         public long DE
         {
