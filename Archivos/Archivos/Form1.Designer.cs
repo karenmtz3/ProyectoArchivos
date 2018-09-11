@@ -38,6 +38,7 @@
             this.BGuardar = new System.Windows.Forms.Button();
             this.BNuevo = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.NuevoAtrib = new System.Windows.Forms.TextBox();
             this.ElimAtrib = new System.Windows.Forms.Button();
             this.ModifAtrib = new System.Windows.Forms.Button();
             this.AgregarAtrib = new System.Windows.Forms.Button();
@@ -64,6 +65,7 @@
             // 
             // AgregaEnt
             // 
+            this.AgregaEnt.Enabled = false;
             this.AgregaEnt.Location = new System.Drawing.Point(115, 17);
             this.AgregaEnt.Name = "AgregaEnt";
             this.AgregaEnt.Size = new System.Drawing.Size(75, 23);
@@ -87,6 +89,7 @@
             // 
             // EntNueva
             // 
+            this.EntNueva.Enabled = false;
             this.EntNueva.Location = new System.Drawing.Point(9, 19);
             this.EntNueva.Name = "EntNueva";
             this.EntNueva.Size = new System.Drawing.Size(100, 20);
@@ -94,6 +97,7 @@
             // 
             // EliminaEnt
             // 
+            this.EliminaEnt.Enabled = false;
             this.EliminaEnt.Location = new System.Drawing.Point(277, 17);
             this.EliminaEnt.Name = "EliminaEnt";
             this.EliminaEnt.Size = new System.Drawing.Size(75, 23);
@@ -103,12 +107,14 @@
             // 
             // ModEnt
             // 
+            this.ModEnt.Enabled = false;
             this.ModEnt.Location = new System.Drawing.Point(196, 17);
             this.ModEnt.Name = "ModEnt";
             this.ModEnt.Size = new System.Drawing.Size(75, 23);
             this.ModEnt.TabIndex = 5;
             this.ModEnt.Text = "Modificar";
             this.ModEnt.UseVisualStyleBackColor = true;
+            this.ModEnt.Click += new System.EventHandler(this.ModEnt_Click);
             // 
             // groupBox2
             // 
@@ -149,22 +155,33 @@
             this.BNuevo.TabIndex = 5;
             this.BNuevo.Text = "Nuevo";
             this.BNuevo.UseVisualStyleBackColor = true;
+            this.BNuevo.Click += new System.EventHandler(this.BNuevo_Click);
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.NuevoAtrib);
             this.groupBox3.Controls.Add(this.ElimAtrib);
             this.groupBox3.Controls.Add(this.ModifAtrib);
             this.groupBox3.Controls.Add(this.AgregarAtrib);
             this.groupBox3.Location = new System.Drawing.Point(755, 2);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(248, 50);
+            this.groupBox3.Size = new System.Drawing.Size(360, 50);
             this.groupBox3.TabIndex = 4;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Atributos";
             // 
+            // NuevoAtrib
+            // 
+            this.NuevoAtrib.Enabled = false;
+            this.NuevoAtrib.Location = new System.Drawing.Point(6, 19);
+            this.NuevoAtrib.Name = "NuevoAtrib";
+            this.NuevoAtrib.Size = new System.Drawing.Size(100, 20);
+            this.NuevoAtrib.TabIndex = 8;
+            // 
             // ElimAtrib
             // 
-            this.ElimAtrib.Location = new System.Drawing.Point(167, 19);
+            this.ElimAtrib.Enabled = false;
+            this.ElimAtrib.Location = new System.Drawing.Point(279, 17);
             this.ElimAtrib.Name = "ElimAtrib";
             this.ElimAtrib.Size = new System.Drawing.Size(75, 23);
             this.ElimAtrib.TabIndex = 7;
@@ -173,7 +190,8 @@
             // 
             // ModifAtrib
             // 
-            this.ModifAtrib.Location = new System.Drawing.Point(87, 19);
+            this.ModifAtrib.Enabled = false;
+            this.ModifAtrib.Location = new System.Drawing.Point(198, 17);
             this.ModifAtrib.Name = "ModifAtrib";
             this.ModifAtrib.Size = new System.Drawing.Size(75, 23);
             this.ModifAtrib.TabIndex = 1;
@@ -182,7 +200,8 @@
             // 
             // AgregarAtrib
             // 
-            this.AgregarAtrib.Location = new System.Drawing.Point(6, 19);
+            this.AgregarAtrib.Enabled = false;
+            this.AgregarAtrib.Location = new System.Drawing.Point(117, 17);
             this.AgregarAtrib.Name = "AgregarAtrib";
             this.AgregarAtrib.Size = new System.Drawing.Size(75, 23);
             this.AgregarAtrib.TabIndex = 0;
@@ -193,6 +212,7 @@
             // 
             this.DGEntidad.AllowUserToAddRows = false;
             this.DGEntidad.AllowUserToDeleteRows = false;
+            this.DGEntidad.AllowUserToOrderColumns = true;
             this.DGEntidad.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.DGEntidad.BackgroundColor = System.Drawing.Color.Silver;
             this.DGEntidad.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -245,7 +265,7 @@
             this.TipoIndice,
             this.DirInd,
             this.DirSA});
-            this.dataGridAtributos.Location = new System.Drawing.Point(477, 59);
+            this.dataGridAtributos.Location = new System.Drawing.Point(512, 59);
             this.dataGridAtributos.Name = "dataGridAtributos";
             this.dataGridAtributos.Size = new System.Drawing.Size(603, 392);
             this.dataGridAtributos.TabIndex = 6;
@@ -296,7 +316,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1084, 456);
+            this.ClientSize = new System.Drawing.Size(1127, 456);
             this.Controls.Add(this.dataGridAtributos);
             this.Controls.Add(this.DGEntidad);
             this.Controls.Add(this.groupBox3);
@@ -310,6 +330,7 @@
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DGEntidad)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridAtributos)).EndInit();
             this.ResumeLayout(false);
@@ -345,6 +366,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn DirInd;
         private System.Windows.Forms.DataGridViewTextBoxColumn DirSA;
         private System.Windows.Forms.TextBox EntNueva;
+        private System.Windows.Forms.TextBox NuevoAtrib;
     }
 }
 

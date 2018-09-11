@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualBasic;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
@@ -16,22 +17,51 @@ namespace Archivos
     {
         private List<Entidad> LEntidades;
         private long cabecera = -1;
-        FileStream fs;
-        BinaryWriter bw;
+
+        SaveFileDialog nuevo;
+        private FileStream fs;
+        private BinaryWriter bw;
+        private Entidad entidad;
         public Proyecto()
         {
             InitializeComponent();
             LEntidades = new List<Entidad>();
+            nuevo = new SaveFileDialog();
             EntNueva.Text = "";
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            fs = new FileStream("Ejemplo.dd", FileMode.OpenOrCreate);
+            /*fs = new FileStream("Ejemplo.dd", FileMode.OpenOrCreate);
             bw = new BinaryWriter(fs);
-            bw.Write(cabecera);
+            bw.Write(cabecera);*/
+            //escribir();
         }
 
+        private void BGuardar_Click(object sender, EventArgs e)
+        {
+            /*fs = new FileStream("Ejemplo.dd", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            bw = new BinaryWriter(fs);
+            bw.Write(cabecera);*/
+        }
+
+        private void BNuevo_Click(object sender, EventArgs e)
+        {
+
+            nuevo.Filter = "Diccionario de Datos(*.dd)|*.dd";
+            if(nuevo.ShowDialog() == DialogResult.OK)
+            {
+                fs = new FileStream(nuevo.FileName, FileMode.OpenOrCreate);
+                bw = new BinaryWriter(fs);
+                bw.Write(cabecera);
+                //fs.Close();
+            }
+           
+            EntNueva.Enabled = NuevoAtrib.Enabled = true;
+            AgregaEnt.Enabled = ModEnt.Enabled = EliminaEnt.Enabled = true;
+            AgregarAtrib.Enabled = ModifAtrib.Enabled = ElimAtrib.Enabled = true;
+
+        }
         private void nuevoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Debug.Write("Hola");
@@ -39,27 +69,36 @@ namespace Archivos
 
         private void AgregaEnt_Click(object sender, EventArgs e)
         {
+            int tam = LEntidades.Count;
+            long TamArch = fs.Length;
+            string nombre = EntNueva.Text;
             if (EntNueva.Text != " ")
             {
-                Entidad entidad;
                 char[] aux = EntNueva.Text.ToCharArray();
                 if (aux.Length <= 30)
                 {
-                    entidad = new Entidad(fs.Position, -1, -1,fs.Seek(fs.Length,SeekOrigin.Current));
-                    entidad.AgregaEspacio(aux);
-                    for (int i = 0; i < entidad.nombreEnt.Length; i++)
-                        Debug.Write(entidad.nombreEnt[i]);
-                    string name = entidad.nombreEnt.ToString();
-                    LEntidades.Add(entidad);
+                    //LEntidades = LEntidades.OrderBy(o => o.NE).ToList();
+                    if (LEntidades.Count == 0)
+                    {
+                        entidad = new Entidad(nombre, TamArch, -1, -1, -1);
+                        entidad.AgregaEspacio();
+                        LEntidades.Add(entidad);
+                        entidad.Guardar(bw);
+                    }
+                    else
+                    {
+                        fs.Seek(LEntidades[tam - 1].DE, SeekOrigin.Begin);
+                        LEntidades[tam - 1].DSE = TamArch;
+                        LEntidades[tam - 1].Guardar(bw);
 
-                    int n = DGEntidad.Rows.Add();
-                    DGEntidad.Rows[n].Cells[0].Value = EntNueva.Text;
-                    DGEntidad.Rows[n].Cells[1].Value = entidad.DE;
-                    DGEntidad.Rows[n].Cells[2].Value = entidad.DA;
-                    DGEntidad.Rows[n].Cells[3].Value = entidad.DD;
-                    DGEntidad.Rows[n].Cells[4].Value = entidad.DSE;
-
-                    EntNueva.Text = " ";
+                        fs.Seek(TamArch, SeekOrigin.Begin);
+                        entidad = new Entidad(nombre, TamArch, -1, -1, -1);
+                        entidad.AgregaEspacio();
+                        LEntidades.Add(entidad);
+                        entidad.Guardar(bw);
+                    }
+                    AgregaFila();
+                    //Debug.WriteLine(fs.Length);
                 }
                 else
                     MessageBox.Show("El nombre de la entidad no debe superar los 30 caracteres");
@@ -71,21 +110,22 @@ namespace Archivos
             }
            
         }
-        public void escribir()
+        public void AgregaFila()
         {
-            fs = new FileStream("Ejemplo.dd", FileMode.OpenOrCreate);
-            bw = new BinaryWriter(fs);
-            bw.Write(cabecera);
-            foreach (Entidad ent in LEntidades)
-            {
-                ent.Guardar(bw);
-            }
+            DGEntidad.Rows.Clear();
+
+            /*LEntidades=LEntidades.OrderBy(o => o.NE).ToList();
+            foreach (Entidad entidad in LEntidades)
+                Debug.WriteLine(entidad.NE);*/
+            foreach (Entidad entidad in LEntidades)
+                DGEntidad.Rows.Add(entidad.NE, entidad.DE, entidad.DA, entidad.DD, entidad.DSE);
+            EntNueva.Clear();
+
         }
-        private void BGuardar_Click(object sender, EventArgs e)
+
+        private void ModEnt_Click(object sender, EventArgs e)
         {
-            /*fs = new FileStream("Ejemplo.dd", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            bw = new BinaryWriter(fs);
-            bw.Write(cabecera);*/
+           string NuevoNombre = Interaction.InputBox("Ingrese el nuevo nombre de la entidad: ", "Modificación de Entidad", " ", 100, 50);
         }
     }
 }

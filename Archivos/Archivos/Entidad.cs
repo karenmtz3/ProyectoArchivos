@@ -10,14 +10,14 @@ namespace Archivos
 {
     class Entidad
     {
-        //private string NombreEnt;
+        private string NombreEnt;
         private char[] Nombre = new char[30];
         private long DirEnt;
         private long DirAtrib;
         private long DirDatos;
         private long DirSigEnt;
 
-        public Entidad(long DEnt, long DAtrib, long DDatos, long DSEnt)
+        public Entidad(string nombre,long DEnt, long DAtrib, long DDatos, long DSEnt)
         {
             DirEnt = DEnt;
             DirAtrib = DAtrib;
@@ -25,11 +25,11 @@ namespace Archivos
             DirSigEnt = DSEnt;
             for (int i = 0; i < 30; i++)
                 Nombre[i] = '*';
-            // Nombre = nombre;
+            NombreEnt = nombre;
         }
-        public void AgregaEspacio(char[] nombre)
+        public void AgregaEspacio()
         {
-
+            char[] nombre = NombreEnt.ToCharArray();
             for (int i = 0; i < 30; i++)
             {
                 if (i < nombre.Length)
@@ -37,11 +37,6 @@ namespace Archivos
                 else
                     break;
             }
-            /*public string SGnombre
-            {
-                set => NombreEnt = value;
-                get => NombreEnt;
-            }*/
         }
 
         public void Guardar(BinaryWriter binaryWriter)
@@ -52,12 +47,6 @@ namespace Archivos
             binaryWriter.Write(DirDatos);
             binaryWriter.Write(DirSigEnt);
 
-        }
-
-        public char[] nombreEnt
-        {
-            set => Nombre = value;
-            get => Nombre;
         }
         public long DE
         {
@@ -79,7 +68,7 @@ namespace Archivos
             set => DirSigEnt = value;
             get => DirSigEnt;
         }
-
+        public string NE { get => NombreEnt; set => NombreEnt = value; }
     }
 
 }
