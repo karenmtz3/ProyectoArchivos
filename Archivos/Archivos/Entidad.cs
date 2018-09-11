@@ -8,7 +8,7 @@ using System.IO;
 
 namespace Archivos
 {
-    class Entidad
+    public class Entidad
     {
         private string NombreEnt;
         private char[] Nombre = new char[30];
@@ -23,8 +23,8 @@ namespace Archivos
             DirAtrib = DAtrib;
             DirDatos = DDatos;
             DirSigEnt = DSEnt;
-            for (int i = 0; i < 30; i++)
-                Nombre[i] = '*';
+            /*for (int i = 0; i < 30; i++)
+                Nombre[i] = '*';*/
             NombreEnt = nombre;
         }
         public void AgregaEspacio()

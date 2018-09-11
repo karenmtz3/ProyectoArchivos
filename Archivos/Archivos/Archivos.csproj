@@ -76,6 +76,12 @@
     <Compile Include="MAtrib.Designer.cs">
       <DependentUpon>MAtrib.cs</DependentUpon>
     </Compile>
+    <Compile Include="ModEnt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ModEnt.Designer.cs">
+      <DependentUpon>ModEnt.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
@@ -83,6 +89,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MAtrib.resx">
       <DependentUpon>MAtrib.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ModEnt.resx">
+      <DependentUpon>ModEnt.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
