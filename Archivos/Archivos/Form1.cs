@@ -26,7 +26,7 @@ namespace Archivos
         **/
 
         private List<Entidad> LEntidades;
-        private long cabecera = -1;
+        private long cabecera = 0;
 
         SaveFileDialog nuevo;
         OpenFileDialog abrir;
@@ -99,22 +99,31 @@ namespace Archivos
                     if (LEntidades.Count == 0)
                     {
                         entidad = new Entidad(nombre, TamArch, -1, -1, -1);
+                        entidad.AgregaEspacio();
+                        LEntidades.Add(entidad);
+                        entidad.Guardar(bw);
                     }
                     else
                     {
-                        fs.Seek(LEntidades[tam - 1].DE, SeekOrigin.Begin);
-                        LEntidades[tam - 1].DSE = TamArch;
-                        LEntidades[tam - 1].Guardar(bw);
 
                         fs.Seek(TamArch, SeekOrigin.Begin);
                         entidad = new Entidad(nombre, TamArch, -1, -1, -1);
+                        entidad.AgregaEspacio();
+                        LEntidades.Add(entidad);
+                        Ordena();
+                        entidad.Guardar(bw);
+
+                        fs.Seek(LEntidades[tam-1].DE, SeekOrigin.Begin);
+                        LEntidades[tam-1].DSE = LEntidades[LEntidades.Count-1].DE;
+                        Ordena();
+                        LEntidades[tam-1].Guardar(bw);
+
                     }
 
-                    entidad.AgregaEspacio();
-                    LEntidades.Add(entidad);
-                    Ordena();
+                    
+                    
                     AgregaFila();
-                    entidad.Guardar(bw);
+                    
 
                 }
                 else
@@ -145,7 +154,6 @@ namespace Archivos
             {
                 LEntidades[i].DSE = LEntidades[i + 1].DE;
             }
-            LEntidades[LEntidades.Count - 1].DSE = -1;
             Debug.WriteLine(cabecera);
         }
         //
@@ -165,13 +173,16 @@ namespace Archivos
             {
                 Debug.WriteLine("se abrio");
                 fs = new FileStream(abrir.FileName,FileMode.Open, FileAccess.Read);
-                fs.Seek(8, SeekOrigin.Begin);
+                fs.Seek(0, SeekOrigin.Begin);
                 br = new BinaryReader(fs);
+                cabecera = br.ReadInt64();
+                aux = cabecera;
                 
                 while(aux != -1)
                 {
                     char[] nombre = br.ReadChars(30);
                     nomb = string.Join("", nombre);
+                    //Debug.WriteLine(fs.Position);
                     long DirEnt = br.ReadInt64();
                     long DirAtrib = br.ReadInt64();
                     long DirDatos = br.ReadInt64();
