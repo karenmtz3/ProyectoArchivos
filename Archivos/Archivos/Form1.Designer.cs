@@ -34,7 +34,9 @@
             this.EliminaEnt = new System.Windows.Forms.Button();
             this.ModEnt = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.cab = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.BtnAbrir = new System.Windows.Forms.Button();
             this.BGuardar = new System.Windows.Forms.Button();
             this.BNuevo = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -56,6 +58,8 @@
             this.TipoIndice = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DirInd = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DirSA = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.NomNuevo = new System.Windows.Forms.TextBox();
+            this.ListNombres = new System.Windows.Forms.ComboBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -76,13 +80,15 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.ListNombres);
+            this.groupBox1.Controls.Add(this.NomNuevo);
             this.groupBox1.Controls.Add(this.EntNueva);
             this.groupBox1.Controls.Add(this.EliminaEnt);
             this.groupBox1.Controls.Add(this.ModEnt);
             this.groupBox1.Controls.Add(this.AgregaEnt);
-            this.groupBox1.Location = new System.Drawing.Point(346, 2);
+            this.groupBox1.Location = new System.Drawing.Point(338, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(358, 50);
+            this.groupBox1.Size = new System.Drawing.Size(358, 89);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Entidad";
@@ -98,17 +104,18 @@
             // EliminaEnt
             // 
             this.EliminaEnt.Enabled = false;
-            this.EliminaEnt.Location = new System.Drawing.Point(277, 17);
+            this.EliminaEnt.Location = new System.Drawing.Point(229, 19);
             this.EliminaEnt.Name = "EliminaEnt";
             this.EliminaEnt.Size = new System.Drawing.Size(75, 23);
             this.EliminaEnt.TabIndex = 6;
             this.EliminaEnt.Text = "Eliminar";
             this.EliminaEnt.UseVisualStyleBackColor = true;
+            this.EliminaEnt.Click += new System.EventHandler(this.EliminaEnt_Click);
             // 
             // ModEnt
             // 
             this.ModEnt.Enabled = false;
-            this.ModEnt.Location = new System.Drawing.Point(196, 17);
+            this.ModEnt.Location = new System.Drawing.Point(115, 55);
             this.ModEnt.Name = "ModEnt";
             this.ModEnt.Size = new System.Drawing.Size(75, 23);
             this.ModEnt.TabIndex = 5;
@@ -118,25 +125,45 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.button1);
+            this.groupBox2.Controls.Add(this.cab);
+            this.groupBox2.Controls.Add(this.label1);
+            this.groupBox2.Controls.Add(this.BtnAbrir);
             this.groupBox2.Controls.Add(this.BGuardar);
             this.groupBox2.Controls.Add(this.BNuevo);
-            this.groupBox2.Location = new System.Drawing.Point(18, 2);
+            this.groupBox2.Location = new System.Drawing.Point(12, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(255, 50);
+            this.groupBox2.Size = new System.Drawing.Size(255, 76);
             this.groupBox2.TabIndex = 3;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Archivo";
             // 
-            // button1
+            // cab
             // 
-            this.button1.Location = new System.Drawing.Point(169, 17);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 7;
-            this.button1.Text = "Abrir";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.cab.AutoSize = true;
+            this.cab.Location = new System.Drawing.Point(73, 52);
+            this.cab.Name = "cab";
+            this.cab.Size = new System.Drawing.Size(16, 13);
+            this.cab.TabIndex = 9;
+            this.cab.Text = "-1";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(7, 51);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(59, 13);
+            this.label1.TabIndex = 8;
+            this.label1.Text = "Cabecera: ";
+            // 
+            // BtnAbrir
+            // 
+            this.BtnAbrir.Location = new System.Drawing.Point(169, 17);
+            this.BtnAbrir.Name = "BtnAbrir";
+            this.BtnAbrir.Size = new System.Drawing.Size(75, 23);
+            this.BtnAbrir.TabIndex = 7;
+            this.BtnAbrir.Text = "Abrir";
+            this.BtnAbrir.UseVisualStyleBackColor = true;
+            this.BtnAbrir.Click += new System.EventHandler(this.BtnAbrir_Click);
             // 
             // BGuardar
             // 
@@ -164,9 +191,9 @@
             this.groupBox3.Controls.Add(this.ElimAtrib);
             this.groupBox3.Controls.Add(this.ModifAtrib);
             this.groupBox3.Controls.Add(this.AgregarAtrib);
-            this.groupBox3.Location = new System.Drawing.Point(755, 2);
+            this.groupBox3.Location = new System.Drawing.Point(723, 12);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(360, 50);
+            this.groupBox3.Size = new System.Drawing.Size(360, 89);
             this.groupBox3.TabIndex = 4;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Atributos";
@@ -182,7 +209,7 @@
             // ElimAtrib
             // 
             this.ElimAtrib.Enabled = false;
-            this.ElimAtrib.Location = new System.Drawing.Point(279, 17);
+            this.ElimAtrib.Location = new System.Drawing.Point(198, 52);
             this.ElimAtrib.Name = "ElimAtrib";
             this.ElimAtrib.Size = new System.Drawing.Size(75, 23);
             this.ElimAtrib.TabIndex = 7;
@@ -192,7 +219,7 @@
             // ModifAtrib
             // 
             this.ModifAtrib.Enabled = false;
-            this.ModifAtrib.Location = new System.Drawing.Point(198, 17);
+            this.ModifAtrib.Location = new System.Drawing.Point(117, 50);
             this.ModifAtrib.Name = "ModifAtrib";
             this.ModifAtrib.Size = new System.Drawing.Size(75, 23);
             this.ModifAtrib.TabIndex = 1;
@@ -202,7 +229,7 @@
             // AgregarAtrib
             // 
             this.AgregarAtrib.Enabled = false;
-            this.AgregarAtrib.Location = new System.Drawing.Point(117, 17);
+            this.AgregarAtrib.Location = new System.Drawing.Point(117, 16);
             this.AgregarAtrib.Name = "AgregarAtrib";
             this.AgregarAtrib.Size = new System.Drawing.Size(75, 23);
             this.AgregarAtrib.TabIndex = 0;
@@ -223,7 +250,7 @@
             this.DirAtrib,
             this.DirDatos,
             this.DirEntS});
-            this.DGEntidad.Location = new System.Drawing.Point(12, 59);
+            this.DGEntidad.Location = new System.Drawing.Point(12, 107);
             this.DGEntidad.Name = "DGEntidad";
             this.DGEntidad.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.DGEntidad.Size = new System.Drawing.Size(443, 392);
@@ -266,7 +293,7 @@
             this.TipoIndice,
             this.DirInd,
             this.DirSA});
-            this.dataGridAtributos.Location = new System.Drawing.Point(512, 59);
+            this.dataGridAtributos.Location = new System.Drawing.Point(512, 107);
             this.dataGridAtributos.Name = "dataGridAtributos";
             this.dataGridAtributos.Size = new System.Drawing.Size(603, 392);
             this.dataGridAtributos.TabIndex = 6;
@@ -313,11 +340,28 @@
             this.DirSA.Name = "DirSA";
             this.DirSA.Width = 90;
             // 
+            // NomNuevo
+            // 
+            this.NomNuevo.Enabled = false;
+            this.NomNuevo.Location = new System.Drawing.Point(9, 55);
+            this.NomNuevo.Name = "NomNuevo";
+            this.NomNuevo.Size = new System.Drawing.Size(100, 20);
+            this.NomNuevo.TabIndex = 8;
+            // 
+            // ListNombres
+            // 
+            this.ListNombres.Enabled = false;
+            this.ListNombres.FormattingEnabled = true;
+            this.ListNombres.Location = new System.Drawing.Point(209, 55);
+            this.ListNombres.Name = "ListNombres";
+            this.ListNombres.Size = new System.Drawing.Size(121, 21);
+            this.ListNombres.TabIndex = 9;
+            // 
             // Proyecto
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1127, 456);
+            this.ClientSize = new System.Drawing.Size(1127, 525);
             this.Controls.Add(this.dataGridAtributos);
             this.Controls.Add(this.DGEntidad);
             this.Controls.Add(this.groupBox3);
@@ -330,6 +374,7 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DGEntidad)).EndInit();
@@ -352,7 +397,7 @@
         private System.Windows.Forms.Button AgregarAtrib;
         private System.Windows.Forms.DataGridView DGEntidad;
         private System.Windows.Forms.DataGridView dataGridAtributos;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button BtnAbrir;
         private System.Windows.Forms.Button BGuardar;
         private System.Windows.Forms.DataGridViewTextBoxColumn NombEnt;
         private System.Windows.Forms.DataGridViewTextBoxColumn DirEnt;
@@ -368,6 +413,10 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn DirSA;
         private System.Windows.Forms.TextBox EntNueva;
         private System.Windows.Forms.TextBox NuevoAtrib;
+        private System.Windows.Forms.Label cab;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ComboBox ListNombres;
+        private System.Windows.Forms.TextBox NomNuevo;
     }
 }
 
