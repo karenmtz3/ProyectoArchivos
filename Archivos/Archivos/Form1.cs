@@ -24,6 +24,8 @@ namespace Archivos
          * bw - variable par escribir en el archivo 
          * br - Variable para leer el archivo
          * entidad - auxiliar para crear nuevas entidades y agregarlas a la lista
+         * atributo - auxiliar para crear nuevos atributos
+         * EntModificar - auxiliar para buscar la entidad a modificar o agregar atributos a esta entidad
          * TamArch - Se almacena el tamaño del archivo
          * nom - Variable que guarda el nombre de la entidad que se agregará 
          * NomArch - Variable que guardará el nombre del archivo 
@@ -32,10 +34,12 @@ namespace Archivos
         **/
 
         private List<Entidad> LEntidades;
+        private List<Atributo> LAtributos;
         private long cabecera = 0;
 
         SaveFileDialog nuevo;
         OpenFileDialog abrir;
+
         private FileStream fs;
         private BinaryWriter bw;
         private BinaryReader br;
@@ -133,7 +137,6 @@ namespace Archivos
             AgregarAtrib.Enabled = ModifAtrib.Enabled = ElimAtrib.Enabled = true;
             ListNombres.Enabled = CBDatos.Enabled = CBIndice.Enabled = true;
         }
-
         //Se actualizan las direcciones siguientes de las entidades y se ordenan las entidades
         private void guardarToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -156,7 +159,8 @@ namespace Archivos
             AgregaAtribDG(); //Se muestra la información de los atributos en el DataGrid
             AgregaFila(); //Se muestran los datos en el DataGrid
         }
-       /**
+       
+        /**
          * Se agrega una entidad nueva al archivo y a la lista
          * Se valida que el nombre de la entidad no sea mayor a 30 caracteres
          * Se valida que el textbox no este vacio 
@@ -229,6 +233,7 @@ namespace Archivos
             }
             return dif;
         }
+
         //Método que agrega los datos al datagridview de entidades
         public void AgregaFila()
         {
@@ -245,13 +250,18 @@ namespace Archivos
         //Método que agrega los datos al datagridview de atributos
         public void AgregaAtribDG()
         {
+            //Se limpia el DataGrid de atributos
             DGAtributos.Rows.Clear();
+            //Ciclo para acceder a la lista de entidades 
             foreach(Entidad entid in LEntidades)
             {
+                //Ciclo para acceder a la lista de atributos de cada entidad 
                 foreach (Atributo atrib in entid.LAtributo1)
+                    //Se agrega la información de los atributos al DataGrid
                     DGAtributos.Rows.Add(atrib.NA, atrib.DA, atrib.TD, atrib.LD, atrib.TI, atrib.DI, atrib.DSA);
             }
         }
+
         //Método que ordena de manera alfabética los elementos de la lista de entidades
         public void Ordena()
         {
@@ -272,20 +282,30 @@ namespace Archivos
             cab.Text = cabecera.ToString();
             Debug.WriteLine(cabecera);
         }
+        //Método que asigna la dirección de siguiente atributo
         public void DirSigAtrib()
         {
             //Ciclo para acceder a la lista de entidades 
-            foreach(Entidad ent in LEntidades)
+            foreach (Entidad ent in LEntidades)
             {
-                //Ciclo para acceder a la lista de atributos que tiene cada entidad
-                for (int i = 0; i < ent.LAtributo1.Count-1; i++)
-                    ent.LAtributo1[i].DSA = ent.LAtributo1[i + 1].DA;
+                //Condición en donde se pondrá en -1 si la lista de atributos de una entidad está vacia
+                if (ent.LAtributo1.Count == 0)
+                    ent.DA = -1;
+                else
+                {
+                    //Ciclo para acceder a la lista de atributos que tiene cada entidad
+                    for (int i = 0; i < ent.LAtributo1.Count - 1; i++)
+                        //Al campo de dirección de atributo de la entidad se le asigna la dirección del nuevo atributo
+                        ent.LAtributo1[i].DSA = ent.LAtributo1[i + 1].DA;
+                }
             }
         }
         //Se guardan los nombre de las entidades en el ComboBox
         public void GuardaCombo()
         {
+            //Se limpia el combo box de las entidades 
             ListNombres.Items.Clear();
+            //Ciclo para agregar las entidades al combo box
             foreach (Entidad ent in LEntidades)
                 ListNombres.Items.Add(ent.NE);
         }
@@ -413,13 +433,108 @@ namespace Archivos
 
         }
 
-        //Evento en donde se mosntrará los atributos de la entidad seleccionada del combo box
+        //Evento en donde se mostrarán los atributos de la entidad seleccionada del combo box
         private void ListNombres_SelectedIndexChanged(object sender, EventArgs e)
         {
             //Se limpia el combo box de atributos
             ListaAtributos.Items.Clear();
             //Se llama al método que llena el combo box de atributos
             ComboAtributo();
+        }
+        //Se busca el atributo que se va a eliminar 
+        private void ElimAtrib_Click(object sender, EventArgs e)
+        {
+            //Auxiliar del nombre de la entidad seleccionada del combo box
+            string aux = ListaAtributos.Text;
+            //Ciclo para acceder a a lista de entidades
+            foreach (Entidad Ent in LEntidades)
+            {
+                //Auxiliar para el tamaño de la lista de atributos de cada entidad
+                int count = Ent.LAtributo1.Count;
+                //Ciclo para acceder a la lista de atributos de una entidad 
+                for (int i = 0; i < count; i++)
+                {
+                    //Condición para encontrar el nombre del atributo seleccionado en el combo box
+                    if (Ent.LAtributo1[i].NA == aux)
+                    {
+                        //Se elimina de la lista
+                        Ent.LAtributo1.RemoveAt(i);
+                        break;
+                    }
+                }
+                //Se actualiza el campo de dirección de atributo que tiene la entidad 
+                if(Ent.LAtributo1.Count > 0)
+                    Ent.DA = Ent.LAtributo1[Ent.LAtributo1.Count-1].DA;
+            }
+
+            //Se limpian los campos que fueron llenados para el atributo
+            NuevoAtrib.Clear();
+            CBDatos.Text = "";
+            CBIndice.Text = "";
+            txtTDato.Clear();
+            ListaAtributos.Text = "";
+            ListNombres.Text = "";
+            //Se llama al método que hará visualizar la información de los atributos en el DatGrid
+            DirSigAtrib();
+
+
+        }
+
+        //Se modifica los campos seleccionados del atributo
+        private void ModifAtrib_Click(object sender, EventArgs e)
+        {
+            //Auxiliar del nombre del atributo seleccionado del combo box
+            string aux = ListaAtributos.Text;
+            //Ciclo para acceder a la lista de entidades
+            foreach (Entidad Ent in LEntidades)
+            {
+                //Auxiliar para el tamaño de la lista de atributos de la entidad
+                int count = Ent.LAtributo1.Count;
+                //Ciclo para acceder a la lista de atributos 
+                for (int i = 0; i < count; i++)
+                {
+                    //Condicional para encontrar el nombre seleccionado del combo box
+                    if (Ent.LAtributo1[i].NA == aux)
+                    {
+                        //Varialbes auxiliares para los campos a modificar
+                        string auxNom = Ent.LAtributo1[i].NA;
+                        char TDato = Ent.LAtributo1[i].TD;
+                        int TIndice = Ent.LAtributo1[i].TI;
+                        int LDato = Ent.LAtributo1[i].LD;
+                        //Metodo que realiza el cambio de información
+                        ValidaCampos(ref TDato, ref TIndice, ref LDato, ref auxNom);
+
+                        //Se guarda la nueva información en los campos correspondientes de la entidad
+                        Ent.LAtributo1[i].NA = auxNom;
+                        Ent.LAtributo1[i].ConvierteChar();
+                        Ent.LAtributo1[i].TD = TDato;
+                        Ent.LAtributo1[i].TI = TIndice;
+                        Ent.LAtributo1[i].LD = LDato;
+                        break;
+                    }
+                }
+            }
+            //Se limpian los campos que se llenaron para hacer modificaciones de un atributo
+            NuevoAtrib.Clear();
+            CBDatos.Text = "";
+            CBIndice.Text = "";
+            txtTDato.Clear();
+            ListaAtributos.Text = "";
+            ListNombres.Text = "";
+            //Se llama al método que hará visualizar la información de los atributos en el DatGrid
+            DirSigAtrib();
+        }
+        //Método que actualiza la información de los campos a modificar
+        public void ValidaCampos(ref char TDato, ref int TIndice, ref int LDato, ref string auxNom)
+        {
+            if (CBDatos.Text != "")
+                TDato = Convert.ToChar(CBDatos.Text); //Se guarda el nuevo tipo de dato
+            if(CBIndice.Text != "")
+                TIndice = Convert.ToInt32(CBIndice.Text);//Se guarda el nuevo tipo de indice 
+            if (txtTDato.Text != "")
+                LDato = Convert.ToInt32(txtTDato.Text);//Se guarda la nueva logitud de dato
+            if (NuevoAtrib.Text != "")
+                auxNom = NuevoAtrib.Text;//Se guarda el nuevo nombre de la entidad
         }
     }
 }

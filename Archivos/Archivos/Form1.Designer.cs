@@ -279,6 +279,7 @@
             this.ElimAtrib.TabIndex = 7;
             this.ElimAtrib.Text = "Eliminar";
             this.ElimAtrib.UseVisualStyleBackColor = true;
+            this.ElimAtrib.Click += new System.EventHandler(this.ElimAtrib_Click);
             // 
             // ModifAtrib
             // 
@@ -289,6 +290,7 @@
             this.ModifAtrib.TabIndex = 1;
             this.ModifAtrib.Text = "Modificar";
             this.ModifAtrib.UseVisualStyleBackColor = true;
+            this.ModifAtrib.Click += new System.EventHandler(this.ModifAtrib_Click);
             // 
             // AgregarAtrib
             // 
