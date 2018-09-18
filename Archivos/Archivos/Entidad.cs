@@ -12,6 +12,7 @@ namespace Archivos
     {
         private string NombreEnt;
         private char[] Nombre = new char[30];
+        private List<Atributo> LAtributo;
         private long DirEnt;
         private long DirAtrib;
         private long DirDatos;
@@ -23,9 +24,8 @@ namespace Archivos
             DirAtrib = DAtrib;
             DirDatos = DDatos;
             DirSigEnt = DSEnt;
-            /*for (int i = 0; i < 30; i++)
-                Nombre[i] = '*';*/
             NombreEnt = nombre;
+            LAtributo = new List<Atributo>();
         }
         public void AgregaEspacio()
         {
@@ -38,7 +38,20 @@ namespace Archivos
                     break;
             }
         }
-
+        public void AgregaAtributo(Atributo a)
+        {
+            LAtributo.Add(a);
+        }
+        public bool EncuentraAtributo(string nombAtrib)
+        {
+            bool encontro = false;
+            for(int i = 0; i < LAtributo.Count; i++)
+            {
+                if (LAtributo[i].NA == nombAtrib)
+                    encontro = true;
+            }
+            return encontro;
+        }
         public void Guardar(BinaryWriter binaryWriter)
         {
             binaryWriter.Write(Nombre);
@@ -69,6 +82,7 @@ namespace Archivos
             get => DirSigEnt;
         }
         public string NE { get => NombreEnt; set => NombreEnt = value; }
+        public List<Atributo> LAtributo1 { get => LAtributo; set => LAtributo = value; }
     }
 
 }

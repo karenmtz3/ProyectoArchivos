@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Archivos
 {
-    class Atributo
+    public class Atributo
     {
-        private int tam = 30;
-        private string[] NombreAtrib;
+        private char[] nombre = new char[30];
+        private string NombreAtrib;
         private long DirAtrib, DirIndice, DSAtrib;
         private char TipoDato;
         private int LongDato, TipoIndice;
 
-        public Atributo(string[] nombre, long DA, long DI, long DSA, char TD, int LD, int TI)
+        public Atributo(string nombre, long DA, char TD, int LD, int TI,long DI, long DSA)
         {
             NombreAtrib = nombre;
             DirAtrib = DA;
@@ -24,8 +25,30 @@ namespace Archivos
             LongDato = LD;
             TipoIndice = TI;
         }
+        public void ConvierteChar()
+        {
+            char[] n = NombreAtrib.ToCharArray();
+            for (int i = 0; i < 30; i++)
+            {
+                if (i < n.Length)
+                    nombre[i] = n[i];
+                else
+                    break;
+            }
+        }
+        public void EscribeAtributo(BinaryWriter bw)
+        {
+            bw.Write(nombre);
+            bw.Write(DirAtrib);
+            bw.Write(DirIndice);
+            bw.Write(DSAtrib);
+            bw.Write(TipoDato);
+            bw.Write(LongDato);
+            bw.Write(TipoIndice);
 
-        public string[] NA
+        }
+
+        public string NA
         {
             set => NombreAtrib = value;
             get => NombreAtrib;

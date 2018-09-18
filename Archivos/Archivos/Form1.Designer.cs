@@ -28,18 +28,24 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Proyecto));
             this.AgregaEnt = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.NomNuevo = new System.Windows.Forms.TextBox();
             this.EntNueva = new System.Windows.Forms.TextBox();
             this.EliminaEnt = new System.Windows.Forms.Button();
             this.ModEnt = new System.Windows.Forms.Button();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.ListNombres = new System.Windows.Forms.ComboBox();
             this.cab = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.BtnAbrir = new System.Windows.Forms.Button();
-            this.BGuardar = new System.Windows.Forms.Button();
-            this.BNuevo = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.NA = new System.Windows.Forms.Label();
+            this.txtTDato = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.CBIndice = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.CBDatos = new System.Windows.Forms.ComboBox();
             this.NuevoAtrib = new System.Windows.Forms.TextBox();
             this.ElimAtrib = new System.Windows.Forms.Button();
             this.ModifAtrib = new System.Windows.Forms.Button();
@@ -50,7 +56,7 @@
             this.DirAtrib = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DirDatos = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DirEntS = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridAtributos = new System.Windows.Forms.DataGridView();
+            this.DGAtributos = new System.Windows.Forms.DataGridView();
             this.NomA = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DirA = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TipoDato = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -58,13 +64,21 @@
             this.TipoIndice = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DirInd = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DirSA = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.NomNuevo = new System.Windows.Forms.TextBox();
-            this.ListNombres = new System.Windows.Forms.ComboBox();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.archivoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.nuevoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.abrirToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.guardarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.salirToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.ListaAtributos = new System.Windows.Forms.ComboBox();
             this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DGEntidad)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridAtributos)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.DGAtributos)).BeginInit();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // AgregaEnt
@@ -80,18 +94,25 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.ListNombres);
             this.groupBox1.Controls.Add(this.NomNuevo);
             this.groupBox1.Controls.Add(this.EntNueva);
             this.groupBox1.Controls.Add(this.EliminaEnt);
             this.groupBox1.Controls.Add(this.ModEnt);
             this.groupBox1.Controls.Add(this.AgregaEnt);
-            this.groupBox1.Location = new System.Drawing.Point(338, 12);
+            this.groupBox1.Location = new System.Drawing.Point(12, 25);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(358, 89);
+            this.groupBox1.Size = new System.Drawing.Size(391, 76);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Entidad";
+            // 
+            // NomNuevo
+            // 
+            this.NomNuevo.Enabled = false;
+            this.NomNuevo.Location = new System.Drawing.Point(208, 17);
+            this.NomNuevo.Name = "NomNuevo";
+            this.NomNuevo.Size = new System.Drawing.Size(100, 20);
+            this.NomNuevo.TabIndex = 8;
             // 
             // EntNueva
             // 
@@ -104,7 +125,7 @@
             // EliminaEnt
             // 
             this.EliminaEnt.Enabled = false;
-            this.EliminaEnt.Location = new System.Drawing.Point(229, 19);
+            this.EliminaEnt.Location = new System.Drawing.Point(115, 47);
             this.EliminaEnt.Name = "EliminaEnt";
             this.EliminaEnt.Size = new System.Drawing.Size(75, 23);
             this.EliminaEnt.TabIndex = 6;
@@ -115,7 +136,7 @@
             // ModEnt
             // 
             this.ModEnt.Enabled = false;
-            this.ModEnt.Location = new System.Drawing.Point(115, 55);
+            this.ModEnt.Location = new System.Drawing.Point(314, 14);
             this.ModEnt.Name = "ModEnt";
             this.ModEnt.Size = new System.Drawing.Size(75, 23);
             this.ModEnt.TabIndex = 5;
@@ -123,24 +144,20 @@
             this.ModEnt.UseVisualStyleBackColor = true;
             this.ModEnt.Click += new System.EventHandler(this.ModEnt_Click);
             // 
-            // groupBox2
+            // ListNombres
             // 
-            this.groupBox2.Controls.Add(this.cab);
-            this.groupBox2.Controls.Add(this.label1);
-            this.groupBox2.Controls.Add(this.BtnAbrir);
-            this.groupBox2.Controls.Add(this.BGuardar);
-            this.groupBox2.Controls.Add(this.BNuevo);
-            this.groupBox2.Location = new System.Drawing.Point(12, 12);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(255, 76);
-            this.groupBox2.TabIndex = 3;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Archivo";
+            this.ListNombres.Enabled = false;
+            this.ListNombres.FormattingEnabled = true;
+            this.ListNombres.Location = new System.Drawing.Point(468, 36);
+            this.ListNombres.Name = "ListNombres";
+            this.ListNombres.Size = new System.Drawing.Size(92, 21);
+            this.ListNombres.TabIndex = 9;
+            this.ListNombres.SelectedIndexChanged += new System.EventHandler(this.ListNombres_SelectedIndexChanged);
             // 
             // cab
             // 
             this.cab.AutoSize = true;
-            this.cab.Location = new System.Drawing.Point(73, 52);
+            this.cab.Location = new System.Drawing.Point(139, 9);
             this.cab.Name = "cab";
             this.cab.Size = new System.Drawing.Size(16, 13);
             this.cab.TabIndex = 9;
@@ -149,67 +166,114 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 51);
+            this.label1.Location = new System.Drawing.Point(74, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(59, 13);
             this.label1.TabIndex = 8;
             this.label1.Text = "Cabecera: ";
             // 
-            // BtnAbrir
-            // 
-            this.BtnAbrir.Location = new System.Drawing.Point(169, 17);
-            this.BtnAbrir.Name = "BtnAbrir";
-            this.BtnAbrir.Size = new System.Drawing.Size(75, 23);
-            this.BtnAbrir.TabIndex = 7;
-            this.BtnAbrir.Text = "Abrir";
-            this.BtnAbrir.UseVisualStyleBackColor = true;
-            this.BtnAbrir.Click += new System.EventHandler(this.BtnAbrir_Click);
-            // 
-            // BGuardar
-            // 
-            this.BGuardar.Location = new System.Drawing.Point(87, 17);
-            this.BGuardar.Name = "BGuardar";
-            this.BGuardar.Size = new System.Drawing.Size(75, 23);
-            this.BGuardar.TabIndex = 6;
-            this.BGuardar.Text = "Guardar";
-            this.BGuardar.UseVisualStyleBackColor = true;
-            this.BGuardar.Click += new System.EventHandler(this.BGuardar_Click);
-            // 
-            // BNuevo
-            // 
-            this.BNuevo.Location = new System.Drawing.Point(6, 17);
-            this.BNuevo.Name = "BNuevo";
-            this.BNuevo.Size = new System.Drawing.Size(75, 23);
-            this.BNuevo.TabIndex = 5;
-            this.BNuevo.Text = "Nuevo";
-            this.BNuevo.UseVisualStyleBackColor = true;
-            this.BNuevo.Click += new System.EventHandler(this.BNuevo_Click);
-            // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.NA);
+            this.groupBox3.Controls.Add(this.txtTDato);
+            this.groupBox3.Controls.Add(this.label4);
+            this.groupBox3.Controls.Add(this.CBIndice);
+            this.groupBox3.Controls.Add(this.label3);
+            this.groupBox3.Controls.Add(this.label2);
+            this.groupBox3.Controls.Add(this.CBDatos);
             this.groupBox3.Controls.Add(this.NuevoAtrib);
             this.groupBox3.Controls.Add(this.ElimAtrib);
             this.groupBox3.Controls.Add(this.ModifAtrib);
             this.groupBox3.Controls.Add(this.AgregarAtrib);
-            this.groupBox3.Location = new System.Drawing.Point(723, 12);
+            this.groupBox3.Location = new System.Drawing.Point(577, 25);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(360, 89);
+            this.groupBox3.Size = new System.Drawing.Size(444, 76);
             this.groupBox3.TabIndex = 4;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Atributos";
             // 
+            // NA
+            // 
+            this.NA.AutoSize = true;
+            this.NA.Location = new System.Drawing.Point(6, 20);
+            this.NA.Name = "NA";
+            this.NA.Size = new System.Drawing.Size(47, 13);
+            this.NA.TabIndex = 15;
+            this.NA.Text = "Nombre:";
+            // 
+            // txtTDato
+            // 
+            this.txtTDato.Enabled = false;
+            this.txtTDato.Location = new System.Drawing.Point(328, 45);
+            this.txtTDato.Name = "txtTDato";
+            this.txtTDato.Size = new System.Drawing.Size(72, 20);
+            this.txtTDato.TabIndex = 14;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(249, 48);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(73, 13);
+            this.label4.TabIndex = 13;
+            this.label4.Text = "Long de dato:";
+            // 
+            // CBIndice
+            // 
+            this.CBIndice.Enabled = false;
+            this.CBIndice.FormattingEnabled = true;
+            this.CBIndice.Items.AddRange(new object[] {
+            "0",
+            "1",
+            "2",
+            "3"});
+            this.CBIndice.Location = new System.Drawing.Point(354, 14);
+            this.CBIndice.Name = "CBIndice";
+            this.CBIndice.Size = new System.Drawing.Size(35, 21);
+            this.CBIndice.TabIndex = 12;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(269, 20);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(79, 13);
+            this.label3.TabIndex = 11;
+            this.label3.Text = "Tipo de índice:";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(151, 19);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(72, 13);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "Tipo de Dato:";
+            // 
+            // CBDatos
+            // 
+            this.CBDatos.Enabled = false;
+            this.CBDatos.FormattingEnabled = true;
+            this.CBDatos.Items.AddRange(new object[] {
+            "E",
+            "C"});
+            this.CBDatos.Location = new System.Drawing.Point(229, 14);
+            this.CBDatos.Name = "CBDatos";
+            this.CBDatos.Size = new System.Drawing.Size(34, 21);
+            this.CBDatos.TabIndex = 9;
+            // 
             // NuevoAtrib
             // 
             this.NuevoAtrib.Enabled = false;
-            this.NuevoAtrib.Location = new System.Drawing.Point(6, 19);
+            this.NuevoAtrib.Location = new System.Drawing.Point(59, 17);
             this.NuevoAtrib.Name = "NuevoAtrib";
-            this.NuevoAtrib.Size = new System.Drawing.Size(100, 20);
+            this.NuevoAtrib.Size = new System.Drawing.Size(86, 20);
             this.NuevoAtrib.TabIndex = 8;
             // 
             // ElimAtrib
             // 
             this.ElimAtrib.Enabled = false;
-            this.ElimAtrib.Location = new System.Drawing.Point(198, 52);
+            this.ElimAtrib.Location = new System.Drawing.Point(168, 43);
             this.ElimAtrib.Name = "ElimAtrib";
             this.ElimAtrib.Size = new System.Drawing.Size(75, 23);
             this.ElimAtrib.TabIndex = 7;
@@ -219,7 +283,7 @@
             // ModifAtrib
             // 
             this.ModifAtrib.Enabled = false;
-            this.ModifAtrib.Location = new System.Drawing.Point(117, 50);
+            this.ModifAtrib.Location = new System.Drawing.Point(87, 43);
             this.ModifAtrib.Name = "ModifAtrib";
             this.ModifAtrib.Size = new System.Drawing.Size(75, 23);
             this.ModifAtrib.TabIndex = 1;
@@ -229,12 +293,13 @@
             // AgregarAtrib
             // 
             this.AgregarAtrib.Enabled = false;
-            this.AgregarAtrib.Location = new System.Drawing.Point(117, 16);
+            this.AgregarAtrib.Location = new System.Drawing.Point(6, 43);
             this.AgregarAtrib.Name = "AgregarAtrib";
             this.AgregarAtrib.Size = new System.Drawing.Size(75, 23);
             this.AgregarAtrib.TabIndex = 0;
             this.AgregarAtrib.Text = "Agregar";
             this.AgregarAtrib.UseVisualStyleBackColor = true;
+            this.AgregarAtrib.Click += new System.EventHandler(this.AgregarAtrib_Click);
             // 
             // DGEntidad
             // 
@@ -281,11 +346,11 @@
             this.DirEntS.HeaderText = "Dirección de Siguiente Entidad";
             this.DirEntS.Name = "DirEntS";
             // 
-            // dataGridAtributos
+            // DGAtributos
             // 
-            this.dataGridAtributos.BackgroundColor = System.Drawing.Color.Silver;
-            this.dataGridAtributos.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridAtributos.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.DGAtributos.BackgroundColor = System.Drawing.Color.Silver;
+            this.DGAtributos.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.DGAtributos.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.NomA,
             this.DirA,
             this.TipoDato,
@@ -293,10 +358,10 @@
             this.TipoIndice,
             this.DirInd,
             this.DirSA});
-            this.dataGridAtributos.Location = new System.Drawing.Point(512, 107);
-            this.dataGridAtributos.Name = "dataGridAtributos";
-            this.dataGridAtributos.Size = new System.Drawing.Size(603, 392);
-            this.dataGridAtributos.TabIndex = 6;
+            this.DGAtributos.Location = new System.Drawing.Point(486, 107);
+            this.DGAtributos.Name = "DGAtributos";
+            this.DGAtributos.Size = new System.Drawing.Size(603, 392);
+            this.DGAtributos.TabIndex = 6;
             // 
             // NomA
             // 
@@ -340,46 +405,126 @@
             this.DirSA.Name = "DirSA";
             this.DirSA.Width = 90;
             // 
-            // NomNuevo
+            // menuStrip1
             // 
-            this.NomNuevo.Enabled = false;
-            this.NomNuevo.Location = new System.Drawing.Point(9, 55);
-            this.NomNuevo.Name = "NomNuevo";
-            this.NomNuevo.Size = new System.Drawing.Size(100, 20);
-            this.NomNuevo.TabIndex = 8;
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.archivoToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(1103, 24);
+            this.menuStrip1.TabIndex = 7;
+            this.menuStrip1.Text = "menuStrip1";
             // 
-            // ListNombres
+            // archivoToolStripMenuItem
             // 
-            this.ListNombres.Enabled = false;
-            this.ListNombres.FormattingEnabled = true;
-            this.ListNombres.Location = new System.Drawing.Point(209, 55);
-            this.ListNombres.Name = "ListNombres";
-            this.ListNombres.Size = new System.Drawing.Size(121, 21);
-            this.ListNombres.TabIndex = 9;
+            this.archivoToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.nuevoToolStripMenuItem,
+            this.abrirToolStripMenuItem,
+            this.guardarToolStripMenuItem,
+            this.toolStripSeparator2,
+            this.salirToolStripMenuItem});
+            this.archivoToolStripMenuItem.Name = "archivoToolStripMenuItem";
+            this.archivoToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
+            this.archivoToolStripMenuItem.Text = "&Archivo";
+            // 
+            // nuevoToolStripMenuItem
+            // 
+            this.nuevoToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("nuevoToolStripMenuItem.Image")));
+            this.nuevoToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.nuevoToolStripMenuItem.Name = "nuevoToolStripMenuItem";
+            this.nuevoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
+            this.nuevoToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.nuevoToolStripMenuItem.Text = "&Nuevo";
+            this.nuevoToolStripMenuItem.Click += new System.EventHandler(this.nuevoToolStripMenuItem_Click_1);
+            // 
+            // abrirToolStripMenuItem
+            // 
+            this.abrirToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("abrirToolStripMenuItem.Image")));
+            this.abrirToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.abrirToolStripMenuItem.Name = "abrirToolStripMenuItem";
+            this.abrirToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.abrirToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.abrirToolStripMenuItem.Text = "&Abrir";
+            this.abrirToolStripMenuItem.Click += new System.EventHandler(this.abrirToolStripMenuItem_Click);
+            // 
+            // guardarToolStripMenuItem
+            // 
+            this.guardarToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("guardarToolStripMenuItem.Image")));
+            this.guardarToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.guardarToolStripMenuItem.Name = "guardarToolStripMenuItem";
+            this.guardarToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.guardarToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.guardarToolStripMenuItem.Text = "&Guardar";
+            this.guardarToolStripMenuItem.Click += new System.EventHandler(this.guardarToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(153, 6);
+            // 
+            // salirToolStripMenuItem
+            // 
+            this.salirToolStripMenuItem.Name = "salirToolStripMenuItem";
+            this.salirToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.salirToolStripMenuItem.Text = "&Salir";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(421, 39);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(46, 13);
+            this.label5.TabIndex = 10;
+            this.label5.Text = "Entidad:";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(421, 72);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(46, 13);
+            this.label6.TabIndex = 11;
+            this.label6.Text = "Atributo:";
+            // 
+            // ListaAtributos
+            // 
+            this.ListaAtributos.FormattingEnabled = true;
+            this.ListaAtributos.Location = new System.Drawing.Point(468, 70);
+            this.ListaAtributos.Name = "ListaAtributos";
+            this.ListaAtributos.Size = new System.Drawing.Size(92, 21);
+            this.ListaAtributos.TabIndex = 12;
             // 
             // Proyecto
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1127, 525);
-            this.Controls.Add(this.dataGridAtributos);
+            this.ClientSize = new System.Drawing.Size(1103, 525);
+            this.Controls.Add(this.ListaAtributos);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.ListNombres);
+            this.Controls.Add(this.DGAtributos);
+            this.Controls.Add(this.cab);
             this.Controls.Add(this.DGEntidad);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.groupBox3);
-            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.menuStrip1);
+            this.MainMenuStrip = this.menuStrip1;
             this.MaximizeBox = false;
             this.Name = "Proyecto";
             this.Text = "Proyecto";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DGEntidad)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridAtributos)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.DGAtributos)).EndInit();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -389,16 +534,12 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button EliminaEnt;
         private System.Windows.Forms.Button ModEnt;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.Button BNuevo;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.Button ElimAtrib;
         private System.Windows.Forms.Button ModifAtrib;
         private System.Windows.Forms.Button AgregarAtrib;
         private System.Windows.Forms.DataGridView DGEntidad;
-        private System.Windows.Forms.DataGridView dataGridAtributos;
-        private System.Windows.Forms.Button BtnAbrir;
-        private System.Windows.Forms.Button BGuardar;
+        private System.Windows.Forms.DataGridView DGAtributos;
         private System.Windows.Forms.DataGridViewTextBoxColumn NombEnt;
         private System.Windows.Forms.DataGridViewTextBoxColumn DirEnt;
         private System.Windows.Forms.DataGridViewTextBoxColumn DirAtrib;
@@ -417,6 +558,23 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox ListNombres;
         private System.Windows.Forms.TextBox NomNuevo;
+        private System.Windows.Forms.Label NA;
+        private System.Windows.Forms.TextBox txtTDato;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox CBIndice;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox CBDatos;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem archivoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem nuevoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem abrirToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem guardarToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem salirToolStripMenuItem;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.ComboBox ListaAtributos;
     }
 }
 
