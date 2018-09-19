@@ -40,11 +40,11 @@ namespace Archivos
         {
             bw.Write(nombre);
             bw.Write(DirAtrib);
-            bw.Write(DirIndice);
-            bw.Write(DSAtrib);
             bw.Write(TipoDato);
             bw.Write(LongDato);
             bw.Write(TipoIndice);
+            bw.Write(DirIndice);
+            bw.Write(DSAtrib);
 
         }
 

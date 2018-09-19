@@ -96,7 +96,10 @@ namespace Archivos
         {
             LEntidades.Clear(); //Se limpia la lista de entidades
             long aux = 0; //Auxiliar de la cabecera
-            string nomb; //Auxilir del nombre de la entidad
+            string nomb; //Auxiliar del nombre de la entidad
+
+            long aux2 = 0; //Auxiliar que guarda la dirección del siguiente atributo
+            string nombA; //Auxiliar para guardar el nombre en string
 
             abrir.Filter = "Diccionario de Datos(*.dd)|*.dd"; //Filtro de la extensión del archivo
             //Condición para saber si el usuario abrió un archivo
@@ -126,9 +129,36 @@ namespace Archivos
 
                     entidad = new Entidad(nomb, DirEnt, DirAtrib, DirDatos, DSE); //Se crea la entidad
                     LEntidades.Add(entidad); //Se agrega la entidad a la lista
+
+                }
+                //Ciclo para acceder a la lista de entidades
+                foreach (Entidad entidad in LEntidades)
+                {
+                    //El auxiliar se iguala a la dirección de atributo que tiene la entidad
+                    aux2 = entidad.DA;
+                    //Ciclo para leer los atributos de una entidad 
+                    while (aux2 != -1)
+                    {
+                        fs.Seek(aux2, SeekOrigin.Begin); //Se posiciona en la dirección del atributo
+                        //Variables auxiliares para leer la información que pertenecen al atributo
+                        char[] nombreA = br.ReadChars(30);
+                        nombA = string.Join("", nombreA);
+                        long DirA = br.ReadInt64();
+                        char TipD = br.ReadChar();
+                        int LongD = br.ReadInt32();
+                        int TipInd = br.ReadInt32();
+                        long DirInd = br.ReadInt64();
+                        long DirSA = br.ReadInt64();
+                        //Se iguala el auxiliar a la dirección de siguiente atributo
+                        aux2 = DirSA;   
+                        atributo = new Atributo(nombA, DirA, TipD, LongD, TipInd, DirInd, DirSA);//Se crea un nuevo atributo
+                        entidad.AgregaAtributo(atributo); //Se agrega el atributo a la lista de atributos de la entidad
+                    }
                 }
                 fs.Close(); //Se cierra el archivo
-                AgregaFila(); //Se muestran los datos del archivo en el DataGrid
+                //Se muestran los datos del archivo en los DataGrid
+                AgregaFila(); 
+                AgregaAtribDG(); 
             }
 
             //Se habilitan los bontones de agregar, modificar y eliminar de enitidades y atributos
