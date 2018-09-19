@@ -89,7 +89,7 @@ namespace Archivos
             EntNueva.Enabled = NuevoAtrib.Enabled = NomNuevo.Enabled = txtTDato.Enabled = true;
             AgregaEnt.Enabled = ModEnt.Enabled = EliminaEnt.Enabled = true;
             AgregarAtrib.Enabled = ModifAtrib.Enabled = ElimAtrib.Enabled = true;
-            ListNombres.Enabled = CBDatos.Enabled = CBIndice.Enabled = true;
+            ListNombres.Enabled = ListaAtributos.Enabled = CBDatos.Enabled = CBIndice.Enabled = true;
         }
         //Se abrirá un nuevo archivo y la información se mostrará en los datagrid
         private void abrirToolStripMenuItem_Click(object sender, EventArgs e)
@@ -165,12 +165,52 @@ namespace Archivos
             EntNueva.Enabled = NuevoAtrib.Enabled = NomNuevo.Enabled = txtTDato.Enabled = true;
             AgregaEnt.Enabled = ModEnt.Enabled = EliminaEnt.Enabled = true;
             AgregarAtrib.Enabled = ModifAtrib.Enabled = ElimAtrib.Enabled = true;
-            ListNombres.Enabled = CBDatos.Enabled = CBIndice.Enabled = true;
+            ListNombres.Enabled = ListaAtributos.Enabled = CBDatos.Enabled = CBIndice.Enabled = true;
+        }
+        //Se limpian los datagrid con la información del archivo
+        private void salirToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            cabecera = -1;
+            cab.Text = cabecera.ToString();
+            DGEntidad.Rows.Clear();
+            DGAtributos.Rows.Clear();
+            //Se deshabilitan los bontones de agregar, modificar y eliminar de enitidades y atributos
+            EntNueva.Enabled = NuevoAtrib.Enabled = NomNuevo.Enabled = txtTDato.Enabled = false;
+            AgregaEnt.Enabled = ModEnt.Enabled = EliminaEnt.Enabled = false;
+            AgregarAtrib.Enabled = ModifAtrib.Enabled = ElimAtrib.Enabled = false;
+            ListNombres.Enabled = ListaAtributos.Enabled = CBDatos.Enabled = CBIndice.Enabled = false;
+        }
+        //Método que actualiza la información
+        public void Actualiza()
+        {
+            Ordena(); //Ordena las entidades
+            DirSigAtrib(); //Asigna la dirección del siguiente atributo
+            GuardaCombo(); //Se guardan los nombres de las entidades en el combo box
+
+            //char[] name = new char[30]; //Auxiliar para guardar el nombre de las entidades
+            fs = File.Open(NomArch, FileMode.Open, FileAccess.Write); //Se abre el archivo
+            bw = new BinaryWriter(fs); //Se escribe un BinaryWriter
+
+            //Ciclo para acceder a la lista de entidades
+            foreach (Entidad entidad in LEntidades)
+            {
+                //Se posiciona en la dirección de la entidad actual
+                fs.Seek(entidad.DE, SeekOrigin.Begin);
+                entidad.Guardar(bw); //Se escribe la entidad en el archivo
+                foreach(Atributo atrib in entidad.LAtributo1)
+                {
+                    fs.Seek(atrib.DA, SeekOrigin.Begin);
+                    atrib.EscribeAtributo(bw);
+                }
+            }
+            fs.Close(); //Se cierra el archivo
+            AgregaAtribDG(); //Se muestra la información de los atributos en el DataGrid
+            AgregaFila(); //Se muestran los datos en el DataGrid
         }
         //Se actualizan las direcciones siguientes de las entidades y se ordenan las entidades
         private void guardarToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Ordena(); //Ordena las entidades
+           /* Ordena(); //Ordena las entidades
             DirSigAtrib(); //Asigna la dirección de la siguiente entidad
             GuardaCombo(); //Se guardan los nombres de las entidades en el combo box
 
@@ -187,7 +227,7 @@ namespace Archivos
             }
             fs.Close(); //Se cierra el archivo
             AgregaAtribDG(); //Se muestra la información de los atributos en el DataGrid
-            AgregaFila(); //Se muestran los datos en el DataGrid
+            AgregaFila(); //Se muestran los datos en el DataGrid*/
         }
        
         /**
@@ -240,6 +280,8 @@ namespace Archivos
                     }
                     AgregaFila(); //Se agregan los valores al DataGrid de entidades
                     fs.Close(); //Se cierra el archivo
+                    Actualiza();
+
                 }
                 else
                     MessageBox.Show("El nombre de la entidad no debe superar los 30 caracteres");
@@ -365,6 +407,7 @@ namespace Archivos
             }
             else
                 MessageBox.Show("Escribe el nuevo nombre de la entidad");
+            Actualiza();
             /*NomEntNuev = NomNuevo.Text; //Se guarda el nuevo nombre de la entidad
             EncuentraEntidad(); //Busca la entidad a modificar
             AgregaFila(); //Se muestran los valores en el DataGrid
@@ -413,10 +456,11 @@ namespace Archivos
             //Se limpian el text box y comobo box de entidades 
             ListNombres.Text = "";
             NomNuevo.Clear();
+            Actualiza();
             //Se muestra el nombre de las entidades en el combo box
             GuardaCombo();
         }
-
+        //Se agrega un nuevo atributo a la entidad seleccionada
         private void AgregarAtrib_Click(object sender, EventArgs e)
         {
             //Se abre el archivo seleccionado
@@ -454,6 +498,10 @@ namespace Archivos
             }
             else
                 MessageBox.Show("Escribe el nombre del nuevo atributo");
+            //Método que actualiza la información del archivo
+            Actualiza();
+            //Método que agrega los nombres de los atributos al combo box
+            ComboAtributo();
             //Se limpian los campos que se rellenan con la información del atributo
             ListNombres.Text = "";
             CBDatos.Text = "";
@@ -496,7 +544,7 @@ namespace Archivos
                 if(Ent.LAtributo1.Count > 0)
                     Ent.DA = Ent.LAtributo1[Ent.LAtributo1.Count-1].DA;
             }
-
+            Actualiza();
             //Se limpian los campos que fueron llenados para el atributo
             NuevoAtrib.Clear();
             CBDatos.Text = "";
@@ -551,6 +599,7 @@ namespace Archivos
             txtTDato.Clear();
             ListaAtributos.Text = "";
             ListNombres.Text = "";
+            Actualiza();
             //Se llama al método que hará visualizar la información de los atributos en el DatGrid
             DirSigAtrib();
         }
@@ -566,5 +615,6 @@ namespace Archivos
             if (NuevoAtrib.Text != "")
                 auxNom = NuevoAtrib.Text;//Se guarda el nuevo nombre de la entidad
         }
+
     }
 }

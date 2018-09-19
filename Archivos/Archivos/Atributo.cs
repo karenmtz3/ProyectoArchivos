@@ -25,8 +25,14 @@ namespace Archivos
             LongDato = LD;
             TipoIndice = TI;
         }
+        public void Limpia()
+        {
+            for (int i = 0; i < 30; i++)
+                nombre[i] = ' ';
+        }
         public void ConvierteChar()
         {
+            Limpia();
             char[] n = NombreAtrib.ToCharArray();
             for (int i = 0; i < 30; i++)
             {

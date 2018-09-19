@@ -27,8 +27,14 @@ namespace Archivos
             NombreEnt = nombre;
             LAtributo = new List<Atributo>();
         }
+        public void Limpia()
+        {
+            for (int i = 0; i < 30; i++)
+                Nombre[i] = ' ';
+        }
         public void AgregaEspacio()
         {
+            Limpia();
             char[] nombre = NombreEnt.ToCharArray();
             for (int i = 0; i < 30; i++)
             {
