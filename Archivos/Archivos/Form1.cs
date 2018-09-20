@@ -58,13 +58,14 @@ namespace Archivos
             InitializeComponent();
             LEntidades = new List<Entidad>();
 
-            nuevo = new SaveFileDialog();
-            abrir = new OpenFileDialog();
+           
             EntNueva.Text = "";
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            nuevo = new SaveFileDialog();
+            abrir = new OpenFileDialog();
         }
         //Crea un nuevo archivo pidiendo el nombre de este 
         private void nuevoToolStripMenuItem_Click_1(object sender, EventArgs e)
@@ -96,10 +97,8 @@ namespace Archivos
         {
             LEntidades.Clear(); //Se limpia la lista de entidades
             long aux = 0; //Auxiliar de la cabecera
-            string nomb; //Auxiliar del nombre de la entidad
 
             long aux2 = 0; //Auxiliar que guarda la dirección del siguiente atributo
-            string nombA; //Auxiliar para guardar el nombre en string
 
             abrir.Filter = "Diccionario de Datos(*.dd)|*.dd"; //Filtro de la extensión del archivo
             //Condición para saber si el usuario abrió un archivo
@@ -118,9 +117,15 @@ namespace Archivos
                 //Ciclo para leer el archivo usando la dirección de las siguientes entidades
                 while (aux != -1)
                 {
+                    string nomb = ""; //Auxiliar del nombre de la entidad
                     fs.Seek(aux, SeekOrigin.Begin); //Se posiciona en la dirección de la cabecera
                     char[] nombre = br.ReadChars(30); //Se guarda el nombre de la entidad
-                    nomb = string.Join("", nombre); //Se transforma a string
+                    //Ciclo para concatenar el nombre y guardarlo en un string
+                    foreach(char n in nombre)
+                    {
+                        if (char.IsLetter(n))
+                            nomb += n;
+                    }
                     long DirEnt = br.ReadInt64(); //Se guarda la dirección de la entidad
                     long DirAtrib = br.ReadInt64(); //Se guarda la dirección del atributo
                     long DirDatos = br.ReadInt64(); //Se guarda la dirección de datos
@@ -139,10 +144,16 @@ namespace Archivos
                     //Ciclo para leer los atributos de una entidad 
                     while (aux2 != -1)
                     {
+                        string nomb = ""; //Auxiliar del nombre de la entidad
                         fs.Seek(aux2, SeekOrigin.Begin); //Se posiciona en la dirección del atributo
                         //Variables auxiliares para leer la información que pertenecen al atributo
                         char[] nombreA = br.ReadChars(30);
-                        nombA = string.Join("", nombreA);
+                        //Ciclo para concatenear el nombre y guardarlo en un string
+                        foreach (char n in nombreA)
+                        {
+                            if (char.IsLetter(n))
+                                nomb += n;
+                        }
                         long DirA = br.ReadInt64();
                         char TipD = br.ReadChar();
                         int LongD = br.ReadInt32();
@@ -151,11 +162,12 @@ namespace Archivos
                         long DirSA = br.ReadInt64();
                         //Se iguala el auxiliar a la dirección de siguiente atributo
                         aux2 = DirSA;   
-                        atributo = new Atributo(nombA, DirA, TipD, LongD, TipInd, DirInd, DirSA);//Se crea un nuevo atributo
+                        atributo = new Atributo(nomb, DirA, TipD, LongD, TipInd, DirInd, DirSA);//Se crea un nuevo atributo
                         entidad.AgregaAtributo(atributo); //Se agrega el atributo a la lista de atributos de la entidad
                     }
                 }
                 fs.Close(); //Se cierra el archivo
+                Actualiza();
                 //Se muestran los datos del archivo en los DataGrid
                 AgregaFila(); 
                 AgregaAtribDG(); 
@@ -196,11 +208,15 @@ namespace Archivos
             {
                 //Se posiciona en la dirección de la entidad actual
                 fs.Seek(entidad.DE, SeekOrigin.Begin);
+                entidad.AgregaEspacio();//Se llama al método que agrega el nombre en el arreglo de char
                 entidad.Guardar(bw); //Se escribe la entidad en el archivo
+                //Ciclo para acceder a la lista de atributos de cada entidad
                 foreach(Atributo atrib in entidad.LAtributo1)
                 {
+                    //Se posiciona en la dirección del atributo
                     fs.Seek(atrib.DA, SeekOrigin.Begin);
-                    atrib.EscribeAtributo(bw);
+                    atrib.ConvierteChar(); //Se llama al métod que agrega el nombre en el arreglo de char
+                    atrib.EscribeAtributo(bw); //Se escibe el atributo en el archivo
                 }
             }
             fs.Close(); //Se cierra el archivo
@@ -238,7 +254,7 @@ namespace Archivos
         private void AgregaEnt_Click(object sender, EventArgs e)
         {
             //Se abre el archivo seleccionado
-            fs = File.Open(NomArch, FileMode.Open, FileAccess.Write);
+            fs = File.Open(NomArch, FileMode.Open, FileAccess.ReadWrite);
             int tam = LEntidades.Count; //Auxiliar para el tamaño de la lista de entidades
             TamArch = fs.Length;    //Auxiliar que guarda el tamaño del archivo
             Nom = EntNueva.Text;    //Auxiliar que guarda el nombre de la nueva entidad
@@ -272,8 +288,9 @@ namespace Archivos
 
                             fs.Seek(TamArch, SeekOrigin.Begin); //Se posiciona al final del archivo
                             bw = new BinaryWriter(fs); //se crea un BinaryWriter
-                                                       //Se escrribe la nueva entidad al archivo
+                            //Se escribe la nueva entidad al archivo
                             entidad.Guardar(bw);
+
                         }
                         else
                             MessageBox.Show("No puede haber dos entidades con el mismo nombre");
@@ -292,7 +309,7 @@ namespace Archivos
             cab.Text = cabecera.ToString();
             EntNueva.Clear(); //Se limpia el textbox donde se escribe el nombre de la nnueva entidad
         }
-
+        
         //Método que verifica que no haya entidades con el mismo nombre
         public bool NombreDif(string nombre)
         {
@@ -339,18 +356,31 @@ namespace Archivos
         {
             //Se ordena la lista de entidaddes usando el atributo de nombre
             LEntidades = LEntidades.OrderBy(o => o.NE).ToList();
-            cabecera = LEntidades[0].DE;    //La cabecera se iguala a la dirección de la primer entidad de la lista
+            if (LEntidades.Count > 0)
+            {
+                cabecera = LEntidades[0].DE;    //La cabecera se iguala a la dirección de la primer entidad de la lista
 
-            fs = File.Open(NomArch, FileMode.Open, FileAccess.Write); //Se abre el archivo con el que se trabajará
-            fs.Seek(0, SeekOrigin.Begin); //Se posiciona al inicio del archivo
-            bw = new BinaryWriter(fs); //Se crea una BinaryWriter con el archivo actual
-            bw.Write(cabecera); //Se escribe la cabecera en el archivo
-            fs.Close(); //Se cierra el archivo
+                fs = File.Open(NomArch, FileMode.Open, FileAccess.Write); //Se abre el archivo con el que se trabajará
+                fs.Seek(0, SeekOrigin.Begin); //Se posiciona al inicio del archivo
+                bw = new BinaryWriter(fs); //Se crea una BinaryWriter con el archivo actual
+                bw.Write(cabecera); //Se escribe la cabecera en el archivo
+                fs.Close(); //Se cierra el archivo
 
-            //Ciclo para modificar el cambio de 'Dirección de siguiente entidad'
-            for (int i = 0; i < LEntidades.Count - 1; i++)
-                //Se modifica la dirección de la siguiente entidad
-                LEntidades[i].DSE = LEntidades[i + 1].DE;
+                //Ciclo para modificar el cambio de 'Dirección de siguiente entidad'
+                for (int i = 0; i < LEntidades.Count - 1; i++)
+                    //Se modifica la dirección de la siguiente entidad
+                    LEntidades[i].DSE = LEntidades[i + 1].DE;
+                LEntidades[LEntidades.Count - 1].DSE = -1;
+            }
+            else
+            {
+                cabecera = -1;
+                fs = File.Open(NomArch, FileMode.Open, FileAccess.Write);//Se abre el archivo sobre el que se trabaja
+                fs.Seek(0, SeekOrigin.Begin);//Se direcciona al inicio del archivo
+                bw = new BinaryWriter(fs);//Se crea un BinaryWriter con el archivo actual
+                bw.Write(cabecera);//Se escribe la cabecera
+                fs.Close();//Se cierra el archivo
+            }
             cab.Text = cabecera.ToString();
             Debug.WriteLine(cabecera);
         }
