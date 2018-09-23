@@ -215,7 +215,7 @@ namespace Archivos
                 {
                     //Se posiciona en la dirección del atributo
                     fs.Seek(atrib.DA, SeekOrigin.Begin);
-                    atrib.ConvierteChar(); //Se llama al métod que agrega el nombre en el arreglo de char
+                    atrib.ConvierteChar(); //Se llama al método que agrega el nombre en el arreglo de char
                     atrib.EscribeAtributo(bw); //Se escibe el atributo en el archivo
                 }
             }
@@ -513,15 +513,24 @@ namespace Archivos
                     //Se posiciona al final del archivo
                     fs.Seek(TamArch, SeekOrigin.Begin);
                     bw = new BinaryWriter(fs); //Se crea un binarywriter 
-                    //Se crea un nuevo atributo
-                    atributo = new Atributo(NuevoAtrib.Text, TamArch, TDato, LDato, TIndice, -1, -1);
-                    //Se convierte el nombre del atributo en arreglo de char
-                    atributo.ConvierteChar();
-                    EntModificar.AgregaAtributo(atributo); //Se agrega el atributo a la lista de atributos de la entidad
-                    EntModificar.DA = EntModificar.LAtributo1[0].DA; //Se asigna la dirección del atributo al campo de dirección de atributo de la entidad
-                    atributo.EscribeAtributo(bw);//se escribe los datos del atributo en el archivo
-                    fs.Close(); //Se cierra el archivo
-                    AgregaAtribDG();//Se muestra la información del atributo en el DatGrid
+                   //Se crea un nuevo atributo
+                   atributo = new Atributo(NuevoAtrib.Text, TamArch, TDato, LDato, TIndice, -1, -1);
+                   bool EncAtrib = EntModificar.EncuentraAtributo(atributo.NA);
+                    if (EncAtrib == true)
+                    {
+                        MessageBox.Show("No pueden existir dos atributos con el mismo nombre");
+                        fs.Close();
+                    }
+                    else
+                    {
+                        //Se convierte el nombre del atributo en arreglo de char
+                        atributo.ConvierteChar();
+                        EntModificar.AgregaAtributo(atributo); //Se agrega el atributo a la lista de atributos de la entidad
+                        EntModificar.DA = EntModificar.LAtributo1[0].DA; //Se asigna la dirección del atributo al campo de dirección de atributo de la entidad
+                        atributo.EscribeAtributo(bw);//se escribe los datos del atributo en el archivo
+                        fs.Close(); //Se cierra el archivo
+                        AgregaAtribDG();//Se muestra la información del atributo en el DatGrid
+                    }
                 }
                 else
                     MessageBox.Show("El nombre del atributo no debe de superar los 30 caracteres");
@@ -571,8 +580,9 @@ namespace Archivos
                     }
                 }
                 //Se actualiza el campo de dirección de atributo que tiene la entidad 
-                if(Ent.LAtributo1.Count > 0)
-                    Ent.DA = Ent.LAtributo1[Ent.LAtributo1.Count-1].DA;
+                if (Ent.LAtributo1.Count > 0)
+                    Ent.DA = Ent.LAtributo1[0].DA;
+                    //Ent.DA = Ent.LAtributo1[Ent.LAtributo1.Count-1].DA;
             }
             Actualiza();
             //Se limpian los campos que fueron llenados para el atributo
