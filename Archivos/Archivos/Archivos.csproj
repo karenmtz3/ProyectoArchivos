@@ -70,19 +70,20 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="MAtrib.cs">
+    <Compile Include="Registro.cs" />
+    <Compile Include="Registros.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MAtrib.Designer.cs">
-      <DependentUpon>MAtrib.cs</DependentUpon>
+    <Compile Include="Registros.Designer.cs">
+      <DependentUpon>Registros.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MAtrib.resx">
-      <DependentUpon>MAtrib.cs</DependentUpon>
+    <EmbeddedResource Include="Registros.resx">
+      <DependentUpon>Registros.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

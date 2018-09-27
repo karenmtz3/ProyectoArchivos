@@ -34,7 +34,7 @@ namespace Archivos
         **/
 
         private List<Entidad> LEntidades;
-        private List<Atributo> LAtributos;
+       // private List<Atributo> LAtributos;
         private long cabecera = 0;
 
         SaveFileDialog nuevo;
@@ -47,6 +47,7 @@ namespace Archivos
         private Entidad entidad;
         private Atributo atributo;
         private Entidad EntModificar;
+        private Entidad EntReg;
 
         long TamArch;
         string Nom = "";
@@ -456,6 +457,7 @@ namespace Archivos
                 if (NomEModif == LEntidades[i].NE)
                 {
                     EntModificar = LEntidades[i];
+                    EntReg = LEntidades[i];
                     /*LEntidades[i].NE = NomEntNuev; //Se cambia el nombre de la entidad
                     LEntidades[i].AgregaEspacio(); //El nombre se convierte en arreglo de char
                     break;*/
@@ -656,5 +658,21 @@ namespace Archivos
                 auxNom = NuevoAtrib.Text;//Se guarda el nuevo nombre de la entidad
         }
 
+        //Llama al form que mostrará la información de los registros de una entidad 
+        private void registroToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (ListNombres.Text == "" || ListNombres.Text == " ")
+                MessageBox.Show("Selecciona la entidad");
+            else
+            {
+                //Busca la entidad seleccionada
+                EncuentraEntidad();
+                Registros reg = new Registros();    //Se crea el nuevo form
+                reg.EntAux1 = EntReg;   //Se guarda la entidad que se selecionó
+                reg.CreaRegistro(reg.EntAux1);  //Llama al método que crea el archivo   
+                reg.CreaColumnas();         //Crea las columnas dependiendo de los atributos que tiene la entidad
+                reg.ShowDialog();       
+            }
+        }
     }
 }
