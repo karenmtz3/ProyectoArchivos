@@ -14,7 +14,7 @@ namespace Archivos
         private List<object> LObj;
         private long DirReg;
         private long DirSigReg;
-        private int tam;
+        private List<int> tam;
 
         char[] CNombre;
 
@@ -23,6 +23,7 @@ namespace Archivos
             DirReg = dirreg;
             DirSigReg = dirsigreg;
             LObj = new List<object>();
+            tam = new List<int>();
         }
         public void Escribe(BinaryWriter bw)
         {
@@ -48,9 +49,10 @@ namespace Archivos
         }
         public void ConvierteChar(string n)
         {
-            CNombre = new char[tam];
+            int t = tam[0];
+            CNombre = new char[t];
             char[] name = n.ToCharArray();
-            for (int i = 0; i < tam; i++)
+            for (int i = 0; i < t; i++)
                 CNombre[i] = ' ';
             for (int i = 0; i < 30; i++)
             {
@@ -59,11 +61,12 @@ namespace Archivos
                 else
                     break;
             }
+            tam.RemoveAt(0);
 
         }
         public List<object> LO { get => LObj; set => LObj = value; }
         public long DR { get => DirReg; set => DirReg = value; }
         public long DSR { get => DirSigReg; set => DirSigReg = value; }
-        public int Tam { get => tam; set => tam = value; }
+        public List<int> Tam { get => tam; set => tam = value; }
     }
 }
