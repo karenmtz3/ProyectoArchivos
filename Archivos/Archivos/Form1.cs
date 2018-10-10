@@ -246,7 +246,21 @@ namespace Archivos
             AgregaAtribDG(); //Se muestra la información de los atributos en el DataGrid
             AgregaFila(); //Se muestran los datos en el DataGrid*/
         }
-       
+
+        public void Clave()
+        {
+            foreach (Entidad entidad in LEntidades)
+            {
+                foreach (Atributo atrib in entidad.LAtributo1)
+                {
+                    if (atrib.TI == 1)
+                    {
+                        atrib.CB = true;
+                    }
+                }
+            }
+        }
+
         /**
          * Se agrega una entidad nueva al archivo y a la lista
          * Se valida que el nombre de la entidad no sea mayor a 30 caracteres
@@ -673,6 +687,10 @@ namespace Archivos
                 reg.CreaColumnas();         //Crea las columnas dependiendo de los atributos que tiene la entidad
                 reg.ShowDialog();       
             }
+        }
+
+        private void CBIndice_SelectedIndexChanged(object sender, EventArgs e)
+        {
         }
     }
 }

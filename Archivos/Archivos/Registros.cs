@@ -41,6 +41,7 @@ namespace Archivos
             abrir = new OpenFileDialog();
 
         }
+        //Se crea las columnas dinámicamente de acuerdo a los atributos que tiene una entidad
         public void CreaColumnas()
         {
             label2.Text = EntAux.NE;
@@ -55,7 +56,6 @@ namespace Archivos
                 colum.HeaderText = atrib.NA;
                 colum.Width = 100;
                 DGRegistros.Columns.Add(colum);
-                
             }
             fin.HeaderText = "Dirección de siguiente registro";
             fin.Width = 80;
@@ -69,10 +69,49 @@ namespace Archivos
                 colum.Width = 100;
                 DGCaptura.Columns.Add(colum);
             }
-           
         }
 
-        public void MuestraDatos()
+        //Pasa la información deL DataGrid de captura al DataGrid de los registros y lo agrega a la lista de registros
+        public void MuestraInf()
+        {
+            int n = DGRegistros.Rows.Add();
+            fs = File.Open(NomArch, FileMode.Open, FileAccess.ReadWrite);
+            TamArch = fs.Length;
+            fs.Seek(TamArch, SeekOrigin.Begin);
+            bw = new BinaryWriter(fs);
+
+            reg = new Registro(TamArch, -1);
+
+            DGRegistros.Rows[n].Cells[0].Value = reg.DR;
+            DGRegistros.Rows[n].Cells[DGRegistros.ColumnCount - 1].Value = reg.DSR;
+            for (int i = 0; i < DGCaptura.ColumnCount; i++)
+            {
+                string elem = (string)DGCaptura.Rows[0].Cells[i].Value;
+                DGRegistros.Rows[n].Cells[i + 1].Value = elem;
+                reg.Elementos.Add(elem);
+            }
+            LRegistros.Add(reg);
+            reg.Escribe(bw, EntAux);
+            fs.Close();
+            Actualizar();
+        }
+        //Se actualiza la infromación y se escribe en el archivo
+        public void Actualizar()
+        {
+            DireccionSigReg();
+            fs = File.Open(NomArch, FileMode.Open, FileAccess.Write); //Se abre el archivo
+            bw = new BinaryWriter(fs); //Se escribe un BinaryWriter
+
+            foreach (Registro r in LRegistros)
+            {
+                fs.Seek(r.DR, SeekOrigin.Begin);
+                r.Escribe(bw, EntAux);
+            }
+            fs.Close();
+            ImprimeLista();
+        }
+
+        /*public void MuestraDatos()
         {
             int n = DGRegistros.Rows.Add();
             fs = File.Open(NomArch, FileMode.Open, FileAccess.ReadWrite);
@@ -116,10 +155,10 @@ namespace Archivos
             reg.Escribe(bw);
             fs.Close();
             Actualiza();
+        }*/
 
-        }
 
-        public void Actualiza()
+        /*public void Actualiza()
         {
             DireccionSigReg();
             fs = File.Open(NomArch, FileMode.Open, FileAccess.Write); //Se abre el archivo
@@ -142,8 +181,9 @@ namespace Archivos
 
             fs.Close();
             ImprimeLista();
-        }
+        }*/
 
+            //Actualiza la dirección del siguiente registro cuando hay más de un elemento en la lista
         public void DireccionSigReg()
         {
             for (int i = 0; i < LRegistros.Count - 1; i++)
@@ -152,8 +192,6 @@ namespace Archivos
             {
                 DGRegistros.Rows[i].Cells[0].Value = LRegistros[i].DR;
                 DGRegistros.Rows[i].Cells[DGRegistros.ColumnCount - 1].Value = LRegistros[i].DSR;
-                /*Debug.WriteLine("Dirección registro: " + LRegistros[i].DR);
-                Debug.WriteLine("Dirección de siguiente registro: " + LRegistros[i].DSR);*/
             }
         }
 
@@ -167,20 +205,37 @@ namespace Archivos
             fs.Close(); //Se cierra el archivo
         }
 
+        //Imprime la información de los registros en consola
         public void ImprimeLista()
         {
             foreach(Registro r in LRegistros)
             {
                 Debug.Write(r.DR + " ");
-                foreach (object obj in r.LO)
+                foreach (string obj in r.Elementos)
                     Debug.Write(obj + " ");
                 Debug.WriteLine(r.DSR);
             }
         }
 
+        //Método que muestra la información de los registros en el DG cuando se abre un nuevo registro
+        public void ImprimeDataGrid()
+        {
+            int aux = DGRegistros.ColumnCount;
+            for (int i = 0; i< LRegistros.Count; i++)
+            {
+                int n = DGRegistros.Rows.Add();
+                DGRegistros.Rows[n].Cells[0].Value = LRegistros[i].DR;
+                for (int k = 0; k < LRegistros[i].Elementos.Count; k++)
+                    DGRegistros.Rows[n].Cells[k+1].Value = LRegistros[i].Elementos[k];
+                DGRegistros.Rows[n].Cells[aux-1].Value = LRegistros[i].DSR;
+
+            }
+        }
+
+        //Agrega un nuevo registro a la lista
         private void BtnAgregar_Click(object sender, EventArgs e)
         {
-            MuestraDatos();
+            MuestraInf();
             DGCaptura.Rows.Clear();
         }
 
@@ -189,7 +244,7 @@ namespace Archivos
             long aux = 0;
             LRegistros.Clear();
 
-            //abrir.Filter = "Archivo de datos(*.dat)|.DAT";
+            //abrir.Filter = "Registro de Datos(*.dat)|*.dat"; //Filtro de la extensión del archivo
             if (abrir.ShowDialog() == DialogResult.OK)
             {
                 //abrir.FileName es el nombre del archivo seleccionado
@@ -198,7 +253,6 @@ namespace Archivos
                 //Se crea un BinaryReader y un BinaryWriter
                 br = new BinaryReader(fs);
                 bw = new BinaryWriter(fs);
-                
 
                 while (aux != -1)
                 {
@@ -207,27 +261,26 @@ namespace Archivos
                     reg = new Registro(-1, -1);
                     fs.Seek(aux, SeekOrigin.Begin); //Se posiciona al inicio del archivo
                     long DirReg = br.ReadInt64(); //Lee la dirección del registro
-                    for(int i = 0; i < EntAux.LAtributo1.Count; i++)
+                    for (int i = 0; i < EntAux.LAtributo1.Count; i++)
                     {
                         if (EntAux.LAtributo1[i].TD == 'E')
                         {
                             valor = br.ReadInt32();
-                            reg.LO.Add(valor);
+                            reg.Elementos.Add(valor.ToString());
                         }
                         else if (EntAux.LAtributo1[i].TD == 'C')
                         {
                             string valor2 = "";
                             tam = EntAux.LAtributo1[i].LD;
-                            reg.Tam.Add(tam);
                             char[] nombre = br.ReadChars(tam);
-                            for(int j = 0; j < nombre.Length; j++)
+                            for (int j = 0; j < nombre.Length; j++)
                             {
                                 if (char.IsLetter(nombre[j]))
                                     valor2 += nombre[j];
                                 else
                                     j = tam;
                             }
-                            reg.LO.Add(valor2);
+                            reg.Elementos.Add(valor2);
                         }
                     }
                     long DirSReg = br.ReadInt64(); //Lee la dirección del siguiente registro
@@ -238,6 +291,7 @@ namespace Archivos
                 }
                 fs.Close();
                 ImprimeLista();
+                ImprimeDataGrid();
             }
         }
     }
