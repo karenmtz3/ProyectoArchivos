@@ -17,6 +17,7 @@ namespace Archivos
         private Entidad EntAux;
         private string NomArch;
         long TamArch;
+        int pos;
 
         private List<Registro> LRegistros;
         private Registro reg;
@@ -108,6 +109,7 @@ namespace Archivos
                 r.Escribe(bw, EntAux);
             }
             fs.Close();
+            ImprimeDataGrid();
             ImprimeLista();
         }
 
@@ -188,6 +190,7 @@ namespace Archivos
         {
             for (int i = 0; i < LRegistros.Count - 1; i++)
                 LRegistros[i].DSR = LRegistros[i + 1].DR;
+            LRegistros[LRegistros.Count - 1].DSR = -1;
             for(int i = 0; i < LRegistros.Count; i++)
             {
                 DGRegistros.Rows[i].Cells[0].Value = LRegistros[i].DR;
@@ -220,6 +223,7 @@ namespace Archivos
         //Método que muestra la información de los registros en el DG cuando se abre un nuevo registro
         public void ImprimeDataGrid()
         {
+            DGRegistros.Rows.Clear();
             int aux = DGRegistros.ColumnCount;
             for (int i = 0; i< LRegistros.Count; i++)
             {
@@ -290,9 +294,51 @@ namespace Archivos
                     LRegistros.Add(reg);
                 }
                 fs.Close();
-                ImprimeLista();
+                //ImprimeLista();
                 ImprimeDataGrid();
             }
+        }
+
+        private void BtnModificar_Click(object sender, EventArgs e)
+        {
+            for (int j = 0; j < DGCaptura.ColumnCount; j++)
+            {
+                string aux = DGCaptura.Rows[0].Cells[j].Value.ToString();
+                DGRegistros.Rows[pos].Cells[j + 1].Value = aux;
+                LRegistros[pos].Elementos[j] = aux;
+            }
+            DGCaptura.Rows.Clear();
+            Actualizar();
+        }
+
+        private void BtnEliminar_Click(object sender, EventArgs e)
+        {
+            string PElem = DGCaptura.Rows[0].Cells[0].Value.ToString();
+            for(int i = 0; i < LRegistros.Count; i++)
+            {
+                string aux = LRegistros[i].Elementos[0];
+                if (PElem == aux)
+                    LRegistros.RemoveAt(i);
+            }
+            DGCaptura.Rows.Clear();
+            Actualizar();
+        }
+
+        // LEntidades = LEntidades.OrderBy(o => o.NE).ToList();
+        /*LRegistros = LRegistros.OrderBy(o => o.Elementos[2]).ToList();
+        ImprimeLista();*/
+        private void DGRegistros_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            pos = e.RowIndex;
+            for (int i = 0; i < DGCaptura.ColumnCount; i++)
+            {
+                string aux;
+                aux = DGRegistros.Rows[pos].Cells[i + 1].Value.ToString();
+                Debug.WriteLine(aux);
+                DGCaptura.Rows[0].Cells[i].Value = aux; ;
+
+             }
+
         }
     }
 }

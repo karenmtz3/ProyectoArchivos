@@ -11,12 +11,10 @@ namespace Archivos
 {
     class Registro
     {
-        //private List<object> LObj;
         private List<string> elementos;
         private List<string> LAux;
         private long DirReg;
         private long DirSigReg;
-        // private List<int> tam;
         int tam;
         char[] CNombre;
 
@@ -26,31 +24,7 @@ namespace Archivos
             DirSigReg = dirsigreg;
             elementos = new List<string>();
             tam = 0;
-            //LObj = new List<object>();
-            //tam = new List<int>();
         }
-        /*public void Escribe(BinaryWriter bw)
-        {
-            bw.Write(DirReg);
-            for (int i = 0; i < LObj.Count; i++)
-            {
-                if (LObj[i].GetType() == typeof(int))
-                {
-                    //Debug.WriteLine("El elemento " + LObj[i] + " es de tipo int");
-                    int e = (int)LObj[i];
-                    bw.Write(e);
-                }
-                else if (LObj[i].GetType() == typeof(string))
-                {
-                    string n = (string)LObj[i];
-                    ConvierteChar(n);
-                    bw.Write(CNombre);
-                   // Debug.WriteLine("El elemento " + LObj[i] + " es de tipo string");
-                }
-
-            }
-            bw.Write(DirSigReg);
-        }*/
         public void llenaAux()
         {
             LAux = new List<string>();
@@ -87,7 +61,6 @@ namespace Archivos
         }
         public void ConvierteChar(string n)
         {
-            //int t = tam[0];
             CNombre = new char[tam];
             char[] name = n.ToCharArray();
             for (int i = 0; i < tam; i++)
@@ -99,13 +72,9 @@ namespace Archivos
                 else
                     break;
             }
-            //tam.RemoveAt(0);
-
         }
-        //public List<object> LO { get => LObj; set => LObj = value; }
         public long DR { get => DirReg; set => DirReg = value; }
         public long DSR { get => DirSigReg; set => DirSigReg = value; }
-        //public List<int> Tam { get => tam; set => tam = value; }
         public List<string> Elementos { get => elementos; set => elementos = value; }
     }
 }

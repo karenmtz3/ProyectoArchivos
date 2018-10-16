@@ -52,10 +52,11 @@
             this.DGRegistros.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             this.DGRegistros.BackgroundColor = System.Drawing.Color.Silver;
             this.DGRegistros.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.DGRegistros.Location = new System.Drawing.Point(12, 153);
+            this.DGRegistros.Location = new System.Drawing.Point(39, 153);
             this.DGRegistros.Name = "DGRegistros";
             this.DGRegistros.Size = new System.Drawing.Size(540, 220);
             this.DGRegistros.TabIndex = 1;
+            this.DGRegistros.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DGRegistros_CellClick);
             // 
             // label1
             // 
@@ -96,6 +97,7 @@
             this.BtnModificar.TabIndex = 6;
             this.BtnModificar.Text = "Modificar";
             this.BtnModificar.UseVisualStyleBackColor = true;
+            this.BtnModificar.Click += new System.EventHandler(this.BtnModificar_Click);
             // 
             // BtnEliminar
             // 
@@ -105,6 +107,7 @@
             this.BtnEliminar.TabIndex = 7;
             this.BtnEliminar.Text = "Eliminar";
             this.BtnEliminar.UseVisualStyleBackColor = true;
+            this.BtnEliminar.Click += new System.EventHandler(this.BtnEliminar_Click);
             // 
             // DGCaptura
             // 
@@ -124,7 +127,7 @@
             this.importarToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(578, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(616, 24);
             this.menuStrip1.TabIndex = 10;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -145,7 +148,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(578, 385);
+            this.ClientSize = new System.Drawing.Size(616, 407);
             this.Controls.Add(this.DGCaptura);
             this.Controls.Add(this.BtnEliminar);
             this.Controls.Add(this.BtnModificar);

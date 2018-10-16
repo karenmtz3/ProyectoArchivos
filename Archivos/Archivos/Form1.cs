@@ -679,13 +679,14 @@ namespace Archivos
                 MessageBox.Show("Selecciona la entidad");
             else
             {
+                ModEnt.Enabled = ModifAtrib.Enabled = false;
                 //Busca la entidad seleccionada
                 EncuentraEntidad();
                 Registros reg = new Registros();    //Se crea el nuevo form
                 reg.EntAux1 = EntReg;   //Se guarda la entidad que se selecionó
                 reg.CreaRegistro(reg.EntAux1);  //Llama al método que crea el archivo   
                 reg.CreaColumnas();         //Crea las columnas dependiendo de los atributos que tiene la entidad
-                reg.ShowDialog();       
+                reg.ShowDialog();
             }
         }
 
