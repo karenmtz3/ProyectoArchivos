@@ -232,6 +232,7 @@
             this.CBIndice.Name = "CBIndice";
             this.CBIndice.Size = new System.Drawing.Size(35, 21);
             this.CBIndice.TabIndex = 12;
+            this.CBIndice.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.CBIndice_DrawItem);
             this.CBIndice.SelectedIndexChanged += new System.EventHandler(this.CBIndice_SelectedIndexChanged);
             // 
             // label3

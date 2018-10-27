@@ -14,7 +14,6 @@ namespace Archivos
         private long DirAtrib, DirIndice, DSAtrib;
         private char TipoDato;
         private int LongDato, TipoIndice;
-        private bool ClaveBusq;
 
         public Atributo(string nombre, long DA, char TD, int LD, int TI,long DI, long DSA)
         {
@@ -90,6 +89,5 @@ namespace Archivos
             set => TipoIndice = value;
             get => TipoIndice;
         }
-        public bool CB { get => ClaveBusq; set => ClaveBusq = value; }
     }
 }

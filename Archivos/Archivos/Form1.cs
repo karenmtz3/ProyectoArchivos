@@ -34,7 +34,7 @@ namespace Archivos
         **/
 
         private List<Entidad> LEntidades;
-       // private List<Atributo> LAtributos;
+        // private List<Atributo> LAtributos;
         private long cabecera = 0;
 
         SaveFileDialog nuevo;
@@ -59,7 +59,7 @@ namespace Archivos
             InitializeComponent();
             LEntidades = new List<Entidad>();
 
-           
+
             EntNueva.Text = "";
         }
 
@@ -122,7 +122,7 @@ namespace Archivos
                     fs.Seek(aux, SeekOrigin.Begin); //Se posiciona en la dirección de la cabecera
                     char[] nombre = br.ReadChars(30); //Se guarda el nombre de la entidad
                     //Ciclo para concatenar el nombre y guardarlo en un string
-                    foreach(char n in nombre)
+                    foreach (char n in nombre)
                     {
                         if (char.IsLetter(n))
                             nomb += n;
@@ -162,7 +162,7 @@ namespace Archivos
                         long DirInd = br.ReadInt64();
                         long DirSA = br.ReadInt64();
                         //Se iguala el auxiliar a la dirección de siguiente atributo
-                        aux2 = DirSA;   
+                        aux2 = DirSA;
                         atributo = new Atributo(nomb, DirA, TipD, LongD, TipInd, DirInd, DirSA);//Se crea un nuevo atributo
                         entidad.AgregaAtributo(atributo); //Se agrega el atributo a la lista de atributos de la entidad
                     }
@@ -170,8 +170,8 @@ namespace Archivos
                 fs.Close(); //Se cierra el archivo
                 Actualiza();
                 //Se muestran los datos del archivo en los DataGrid
-                AgregaFila(); 
-                AgregaAtribDG(); 
+                AgregaFila();
+                AgregaAtribDG();
             }
 
             //Se habilitan los bontones de agregar, modificar y eliminar de enitidades y atributos
@@ -212,7 +212,7 @@ namespace Archivos
                 entidad.AgregaEspacio();//Se llama al método que agrega el nombre en el arreglo de char
                 entidad.Guardar(bw); //Se escribe la entidad en el archivo
                 //Ciclo para acceder a la lista de atributos de cada entidad
-                foreach(Atributo atrib in entidad.LAtributo1)
+                foreach (Atributo atrib in entidad.LAtributo1)
                 {
                     //Se posiciona en la dirección del atributo
                     fs.Seek(atrib.DA, SeekOrigin.Begin);
@@ -227,26 +227,27 @@ namespace Archivos
         //Se actualizan las direcciones siguientes de las entidades y se ordenan las entidades
         private void guardarToolStripMenuItem_Click(object sender, EventArgs e)
         {
-           /* Ordena(); //Ordena las entidades
-            DirSigAtrib(); //Asigna la dirección de la siguiente entidad
-            GuardaCombo(); //Se guardan los nombres de las entidades en el combo box
+            /* Ordena(); //Ordena las entidades
+             DirSigAtrib(); //Asigna la dirección de la siguiente entidad
+             GuardaCombo(); //Se guardan los nombres de las entidades en el combo box
 
-            //char[] name = new char[30]; //Auxiliar para guardar el nombre de las entidades
-            fs = File.Open(NomArch, FileMode.Open, FileAccess.Write); //Se abre el archivo
-            bw = new BinaryWriter(fs); //Se escribe un BinaryWriter
+             //char[] name = new char[30]; //Auxiliar para guardar el nombre de las entidades
+             fs = File.Open(NomArch, FileMode.Open, FileAccess.Write); //Se abre el archivo
+             bw = new BinaryWriter(fs); //Se escribe un BinaryWriter
 
-            //Ciclo para acceder a la lista de entidades
-            foreach (Entidad entidad in LEntidades)
-            {
-                //Se posiciona en la dirección de la entidad actual
-                fs.Seek(entidad.DE, SeekOrigin.Begin);
-                entidad.Guardar(bw); //Se escribe la entidad en el archivo
-            }
-            fs.Close(); //Se cierra el archivo
-            AgregaAtribDG(); //Se muestra la información de los atributos en el DataGrid
-            AgregaFila(); //Se muestran los datos en el DataGrid*/
+             //Ciclo para acceder a la lista de entidades
+             foreach (Entidad entidad in LEntidades)
+             {
+                 //Se posiciona en la dirección de la entidad actual
+                 fs.Seek(entidad.DE, SeekOrigin.Begin);
+                 entidad.Guardar(bw); //Se escribe la entidad en el archivo
+             }
+             fs.Close(); //Se cierra el archivo
+             AgregaAtribDG(); //Se muestra la información de los atributos en el DataGrid
+             AgregaFila(); //Se muestran los datos en el DataGrid*/
         }
 
+        //Método que valida que solo puede existir un atributo que sea clave de búsqueda
         public void Clave()
         {
             foreach (Entidad entidad in LEntidades)
@@ -255,7 +256,11 @@ namespace Archivos
                 {
                     if (atrib.TI == 1)
                     {
-                        atrib.CB = true;
+                        if (CBIndice.SelectedIndex == 1)
+                        {
+                            string c = "0";
+                            CBIndice.Text = c;
+                        }
                     }
                 }
             }
@@ -275,7 +280,7 @@ namespace Archivos
             Nom = EntNueva.Text;    //Auxiliar que guarda el nombre de la nueva entidad
             if (Nom != " " || Nom != "") //Se valida que el nombre sea diferente de una cadena vacía
             {
-                char[] aux = EntNueva.Text.ToCharArray(); 
+                char[] aux = EntNueva.Text.ToCharArray();
                 if (aux.Length <= 30) //Condición para saber si el nombre es menor o igual a 30 caracteres
                 {
                     if (LEntidades.Count == 0) //Condición para saber si la lista está vacia
@@ -324,12 +329,12 @@ namespace Archivos
             cab.Text = cabecera.ToString();
             EntNueva.Clear(); //Se limpia el textbox donde se escribe el nombre de la nnueva entidad
         }
-        
+
         //Método que verifica que no haya entidades con el mismo nombre
         public bool NombreDif(string nombre)
         {
             bool dif = true;
-            foreach(Entidad ent in LEntidades)
+            foreach (Entidad ent in LEntidades)
             {
                 //Si se encuentra una entidad con el mismo nombre se cambia la bandera a false
                 if (ent.NE == nombre)
@@ -350,14 +355,14 @@ namespace Archivos
             EntNueva.Clear();
 
         }
-        
+
         //Método que agrega los datos al datagridview de atributos
         public void AgregaAtribDG()
         {
             //Se limpia el DataGrid de atributos
             DGAtributos.Rows.Clear();
             //Ciclo para acceder a la lista de entidades 
-            foreach(Entidad entid in LEntidades)
+            foreach (Entidad entid in LEntidades)
             {
                 //Ciclo para acceder a la lista de atributos de cada entidad 
                 foreach (Atributo atrib in entid.LAtributo1)
@@ -465,7 +470,7 @@ namespace Archivos
         {
             NomEModif = ListNombres.Text;
             //Ciclo para recorrer la lista de entidades
-            for(int i = 0; i < LEntidades.Count; i++)
+            for (int i = 0; i < LEntidades.Count; i++)
             {
                 //Se busca el nombre de la entidad a modificar en la lista de entidades
                 if (NomEModif == LEntidades[i].NE)
@@ -529,9 +534,9 @@ namespace Archivos
                     //Se posiciona al final del archivo
                     fs.Seek(TamArch, SeekOrigin.Begin);
                     bw = new BinaryWriter(fs); //Se crea un binarywriter 
-                   //Se crea un nuevo atributo
-                   atributo = new Atributo(NuevoAtrib.Text, TamArch, TDato, LDato, TIndice, -1, -1);
-                   bool EncAtrib = EntModificar.EncuentraAtributo(atributo.NA);
+                                               //Se crea un nuevo atributo
+                    atributo = new Atributo(NuevoAtrib.Text, TamArch, TDato, LDato, TIndice, -1, -1);
+                    bool EncAtrib = EntModificar.EncuentraAtributo(atributo.NA);
                     if (EncAtrib == true)
                     {
                         MessageBox.Show("No pueden existir dos atributos con el mismo nombre");
@@ -598,7 +603,7 @@ namespace Archivos
                 //Se actualiza el campo de dirección de atributo que tiene la entidad 
                 if (Ent.LAtributo1.Count > 0)
                     Ent.DA = Ent.LAtributo1[0].DA;
-                    //Ent.DA = Ent.LAtributo1[Ent.LAtributo1.Count-1].DA;
+                //Ent.DA = Ent.LAtributo1[Ent.LAtributo1.Count-1].DA;
             }
             Actualiza();
             //Se limpian los campos que fueron llenados para el atributo
@@ -664,7 +669,7 @@ namespace Archivos
         {
             if (CBDatos.Text != "")
                 TDato = Convert.ToChar(CBDatos.Text); //Se guarda el nuevo tipo de dato
-            if(CBIndice.Text != "")
+            if (CBIndice.Text != "")
                 TIndice = Convert.ToInt32(CBIndice.Text);//Se guarda el nuevo tipo de indice 
             if (txtTDato.Text != "")
                 LDato = Convert.ToInt32(txtTDato.Text);//Se guarda la nueva logitud de dato
@@ -684,13 +689,26 @@ namespace Archivos
                 EncuentraEntidad();
                 Registros reg = new Registros();    //Se crea el nuevo form
                 reg.EntAux1 = EntReg;   //Se guarda la entidad que se selecionó
-                reg.CreaRegistro(reg.EntAux1);  //Llama al método que crea el archivo   
+                reg.CreaRegistro(reg.EntAux1);  //Llama al método que crea el archivo 
+
                 reg.CreaColumnas();         //Crea las columnas dependiendo de los atributos que tiene la entidad
                 reg.ShowDialog();
+                //Cambia la dirección de datos, solo está en memoria
+                if (reg.LRegistros1.Count > 0)
+                {
+                    EntReg.DD = reg.LRegistros1[0].DR;
+                    AgregaFila();
+                    Actualiza();
+                }
             }
         }
 
         private void CBIndice_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Clave();
+        }
+
+        private void CBIndice_DrawItem(object sender, DrawItemEventArgs e)
         {
         }
     }

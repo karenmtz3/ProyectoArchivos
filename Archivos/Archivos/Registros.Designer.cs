@@ -38,9 +38,16 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.abrirToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.label3 = new System.Windows.Forms.Label();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.Valor = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Direccion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.val = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Dir = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.DGRegistros)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.DGCaptura)).BeginInit();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // DGRegistros
@@ -52,9 +59,9 @@
             this.DGRegistros.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             this.DGRegistros.BackgroundColor = System.Drawing.Color.Silver;
             this.DGRegistros.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.DGRegistros.Location = new System.Drawing.Point(39, 153);
+            this.DGRegistros.Location = new System.Drawing.Point(12, 188);
             this.DGRegistros.Name = "DGRegistros";
-            this.DGRegistros.Size = new System.Drawing.Size(540, 220);
+            this.DGRegistros.Size = new System.Drawing.Size(540, 259);
             this.DGRegistros.TabIndex = 1;
             this.DGRegistros.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DGRegistros_CellClick);
             // 
@@ -115,7 +122,7 @@
             this.DGCaptura.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.DGCaptura.BackgroundColor = System.Drawing.Color.Silver;
             this.DGCaptura.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.DGCaptura.Location = new System.Drawing.Point(77, 67);
+            this.DGCaptura.Location = new System.Drawing.Point(77, 80);
             this.DGCaptura.Name = "DGCaptura";
             this.DGCaptura.Size = new System.Drawing.Size(365, 69);
             this.DGCaptura.TabIndex = 8;
@@ -127,7 +134,7 @@
             this.importarToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(616, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(996, 24);
             this.menuStrip1.TabIndex = 10;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -144,11 +151,58 @@
             this.importarToolStripMenuItem.Size = new System.Drawing.Size(65, 20);
             this.importarToolStripMenuItem.Text = "Importar";
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.BackColor = System.Drawing.SystemColors.Control;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Location = new System.Drawing.Point(740, 33);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(58, 16);
+            this.label3.TabIndex = 12;
+            this.label3.Text = "Índices";
+            // 
+            // dataGridView1
+            // 
+            this.dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Valor,
+            this.Direccion,
+            this.val,
+            this.Dir});
+            this.dataGridView1.Location = new System.Drawing.Point(617, 67);
+            this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.Size = new System.Drawing.Size(331, 222);
+            this.dataGridView1.TabIndex = 13;
+            // 
+            // Valor
+            // 
+            this.Valor.HeaderText = "Valor";
+            this.Valor.Name = "Valor";
+            // 
+            // Direccion
+            // 
+            this.Direccion.HeaderText = "Dirección";
+            this.Direccion.Name = "Direccion";
+            // 
+            // val
+            // 
+            this.val.HeaderText = "Valor";
+            this.val.Name = "val";
+            // 
+            // Dir
+            // 
+            this.Dir.HeaderText = "Dirección";
+            this.Dir.Name = "Dir";
+            // 
             // Registros
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(616, 407);
+            this.ClientSize = new System.Drawing.Size(996, 535);
+            this.Controls.Add(this.dataGridView1);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.DGCaptura);
             this.Controls.Add(this.BtnEliminar);
             this.Controls.Add(this.BtnModificar);
@@ -164,6 +218,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.DGCaptura)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -180,5 +235,11 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem abrirToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem importarToolStripMenuItem;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Valor;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Direccion;
+        private System.Windows.Forms.DataGridViewTextBoxColumn val;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Dir;
     }
 }

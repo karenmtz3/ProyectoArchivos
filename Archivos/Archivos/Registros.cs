@@ -18,6 +18,7 @@ namespace Archivos
         private string NomArch;
         long TamArch;
         int pos;
+        long cabecera;
 
         private List<Registro> LRegistros;
         private Registro reg;
@@ -30,8 +31,10 @@ namespace Archivos
         private BinaryWriter bw;
         private BinaryReader br;
 
+        int cb;
 
         public Entidad EntAux1 { get => EntAux; set => EntAux = value; }
+        internal List<Registro> LRegistros1 { get => LRegistros; set => LRegistros = value; }
 
         public Registros()
         {
@@ -185,12 +188,43 @@ namespace Archivos
             ImprimeLista();
         }*/
 
-            //Actualiza la dirección del siguiente registro cuando hay más de un elemento en la lista
+       
+
+        public bool ClaveBusqueda()
+        {
+            for (int i = 0; i < EntAux.LAtributo1.Count; i++)
+            {
+                Atributo atrib = EntAux.LAtributo1[i];
+                if (atrib.TI == 1)
+                {
+                    cb = i;
+                    return true;
+                }
+            }
+            return false;
+        }
+        // LEntidades = LEntidades.OrderBy(o => o.NE).ToList();
+        /*LRegistros = LRegistros.OrderBy(o => o.Elementos[2]).ToList();
+        ImprimeLista();*/
+        //Actualiza la dirección del siguiente registro cuando hay más de un elemento en la lista
         public void DireccionSigReg()
         {
-            for (int i = 0; i < LRegistros.Count - 1; i++)
-                LRegistros[i].DSR = LRegistros[i + 1].DR;
-            LRegistros[LRegistros.Count - 1].DSR = -1;
+            bool Clave = ClaveBusqueda();
+            if (Clave == true)
+            {
+                LRegistros = LRegistros.OrderBy(o => o.Elementos[cb]).ToList();
+                for (int i = 0; i < LRegistros.Count - 1; i++)
+                    LRegistros[i].DSR = LRegistros[i + 1].DR;
+                LRegistros[LRegistros.Count - 1].DSR = -1;
+
+            }
+            else
+            {
+                for (int i = 0; i < LRegistros.Count - 1; i++)
+                    LRegistros[i].DSR = LRegistros[i + 1].DR;
+                LRegistros[LRegistros.Count - 1].DSR = -1;
+            }
+            
             for(int i = 0; i < LRegistros.Count; i++)
             {
                 DGRegistros.Rows[i].Cells[0].Value = LRegistros[i].DR;
@@ -245,6 +279,7 @@ namespace Archivos
 
         private void abrirToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            cabecera = EntAux.DD;
             long aux = 0;
             LRegistros.Clear();
 
@@ -257,7 +292,7 @@ namespace Archivos
                 //Se crea un BinaryReader y un BinaryWriter
                 br = new BinaryReader(fs);
                 bw = new BinaryWriter(fs);
-
+                aux = cabecera;
                 while (aux != -1)
                 {
                     int valor;
@@ -324,9 +359,7 @@ namespace Archivos
             Actualizar();
         }
 
-        // LEntidades = LEntidades.OrderBy(o => o.NE).ToList();
-        /*LRegistros = LRegistros.OrderBy(o => o.Elementos[2]).ToList();
-        ImprimeLista();*/
+       
         private void DGRegistros_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             pos = e.RowIndex;
