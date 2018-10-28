@@ -70,6 +70,8 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="IndicePrim.cs" />
+    <Compile Include="IndiceSec.cs" />
     <Compile Include="Registro.cs" />
     <Compile Include="Registros.cs">
       <SubType>Form</SubType>

@@ -33,6 +33,9 @@ namespace Archivos
 
         int cb;
 
+        IndicePrim IPrimario;
+        IndiceSec ISecundario;
+
         public Entidad EntAux1 { get => EntAux; set => EntAux = value; }
         internal List<Registro> LRegistros1 { get => LRegistros; set => LRegistros = value; }
 
@@ -49,7 +52,7 @@ namespace Archivos
         public void CreaColumnas()
         {
             label2.Text = EntAux.NE;
-            
+
             inicio.HeaderText = "Dirección de Registro";
             inicio.Width = 80;
             DGRegistros.Columns.Add(inicio);
@@ -116,80 +119,6 @@ namespace Archivos
             ImprimeLista();
         }
 
-        /*public void MuestraDatos()
-        {
-            int n = DGRegistros.Rows.Add();
-            fs = File.Open(NomArch, FileMode.Open, FileAccess.ReadWrite);
-            TamArch = fs.Length;
-            fs.Seek(TamArch, SeekOrigin.Begin);
-            bw = new BinaryWriter(fs);
-
-
-            reg = new Registro(TamArch, -1);
-
-            DGRegistros.Rows[n].Cells[0].Value = reg.DR;
-            DGRegistros.Rows[n].Cells[DGRegistros.ColumnCount - 1].Value = reg.DSR;
-
-            for (int i = 0; i < DGCaptura.ColumnCount; i++)
-            {
-                int ent;
-                string cad;
-                foreach (Atributo a in EntAux.LAtributo1)
-                {
-                    if (a.NA == DGCaptura.Columns[i].HeaderText)
-                    {
-                        if (a.TD == 'E')
-                        {
-                            ent = Convert.ToInt32(DGCaptura.Rows[0].Cells[i].Value);
-                            DGRegistros.Rows[n].Cells[i+1].Value = ent;
-                            reg.LO.Add(ent);
-                            break;
-                        }
-                        else if (a.TD == 'C')
-                        {
-                            cad = (string)DGCaptura.Rows[0].Cells[i].Value;
-                            DGRegistros.Rows[n].Cells[i+1].Value = cad;
-                            reg.Tam.Add(a.LD);
-                            reg.LO.Add(cad);
-                            break;
-                        }
-                    }
-                }
-            }
-            LRegistros.Add(reg);
-            reg.Escribe(bw);
-            fs.Close();
-            Actualiza();
-        }*/
-
-
-        /*public void Actualiza()
-        {
-            DireccionSigReg();
-            fs = File.Open(NomArch, FileMode.Open, FileAccess.Write); //Se abre el archivo
-            bw = new BinaryWriter(fs); //Se escribe un BinaryWriter
-
-
-            foreach (Atributo a in EntAux.LAtributo1)
-            {
-                foreach (Registro r in LRegistros)
-                {
-                    if (a.TD == 'C')
-                        r.Tam.Add(a.LD);
-                }
-            }
-            foreach (Registro r in LRegistros)
-            {
-                fs.Seek(r.DR, SeekOrigin.Begin);
-                r.Escribe(bw);
-            }
-
-            fs.Close();
-            ImprimeLista();
-        }*/
-
-       
-
         public bool ClaveBusqueda()
         {
             for (int i = 0; i < EntAux.LAtributo1.Count; i++)
@@ -224,8 +153,8 @@ namespace Archivos
                     LRegistros[i].DSR = LRegistros[i + 1].DR;
                 LRegistros[LRegistros.Count - 1].DSR = -1;
             }
-            
-            for(int i = 0; i < LRegistros.Count; i++)
+
+            for (int i = 0; i < LRegistros.Count; i++)
             {
                 DGRegistros.Rows[i].Cells[0].Value = LRegistros[i].DR;
                 DGRegistros.Rows[i].Cells[DGRegistros.ColumnCount - 1].Value = LRegistros[i].DSR;
@@ -240,6 +169,70 @@ namespace Archivos
             fs = new FileStream(NomArch, FileMode.OpenOrCreate);
             bw = new BinaryWriter(fs); //Se crea un BinaryWriter
             fs.Close(); //Se cierra el archivo
+        }
+
+        //Checa que existan atributos con índice primario o secundario
+        public void VerificaIndices()
+        {
+            foreach (Atributo atrib in EntAux.LAtributo1)
+            {
+                if (atrib.TI != 0 || atrib.TI != 1)
+                    CreaIndices(atrib);
+            }
+        }
+
+        //Crea el archivo de índices
+        public void CreaIndices(Atributo atributo)
+        {
+            NomArch = EntAux.NE + ".idx";
+            fs = new FileStream(NomArch, FileMode.OpenOrCreate);
+            bw = new BinaryWriter(fs);
+            
+            if (atributo.TI == 2)
+            {
+                fs.Seek(fs.Length, SeekOrigin.Begin);
+                IPrimario = new IndicePrim(atributo);
+                IPrimario.CreaBPrincipal();
+                MuestraIndiceP(IPrimario);
+                IPrimario.EscribeBPrincipal(bw);
+            }
+            if(atributo.TI == 3)
+            {
+                Debug.WriteLine(fs.Length);
+                fs.Seek(fs.Length, SeekOrigin.Begin);
+                ISecundario = new IndiceSec(atributo);
+                ISecundario.BPrincipalSec();
+                MuestraIndicieS(ISecundario);
+                ISecundario.EscribeBSec(bw);
+                Debug.WriteLine(fs.Length);
+            }
+            fs.Close();
+
+        }
+        //Método que muestra el bloque principal del índice primario
+        public void MuestraIndiceP(IndicePrim prim)
+        {
+            List<string> AuxT = prim.LTipo1;
+            List<long> AuxD = prim.LDir1;
+            for (int i = 0; i < AuxT.Count; i++)
+            {
+                int n = DGPrimario.Rows.Add();
+                DGPrimario.Rows[n].Cells[0].Value = AuxT[i];
+                DGPrimario.Rows[n].Cells[1].Value = AuxD[i];
+            }
+        }
+
+        //Método que muestra el bloque principal del índice secundario
+        public void MuestraIndicieS(IndiceSec sec)
+        {
+            List<string> AuxInf = sec.LInf1;
+            List<long> AuxD = sec.LDir1;
+            for(int i = 0; i < AuxInf.Count; i++)
+            {
+                int n = DGSecundario.Rows.Add();
+                DGSecundario.Rows[n].Cells[0].Value = AuxInf[i];
+                DGSecundario.Rows[n].Cells[1].Value = AuxD[i]; 
+            }
         }
 
         //Imprime la información de los registros en consola

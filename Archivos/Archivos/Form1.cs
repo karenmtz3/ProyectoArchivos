@@ -247,22 +247,23 @@ namespace Archivos
              AgregaFila(); //Se muestran los datos en el DataGrid*/
         }
 
-        //Método que valida que solo puede existir un atributo que sea clave de búsqueda
-        public void Clave()
+        //Método que valida que solo puede existir un atributo que sea clave de búsqueda o que sea índice primario
+        public void ChecaIndices()
         {
             foreach (Entidad entidad in LEntidades)
             {
                 foreach (Atributo atrib in entidad.LAtributo1)
-                {
-                    if (atrib.TI == 1)
+                    switch(atrib.TI)
                     {
-                        if (CBIndice.SelectedIndex == 1)
-                        {
-                            string c = "0";
-                            CBIndice.Text = c;
-                        }
+                        case 1:
+                            if (CBIndice.SelectedIndex == 1)
+                                CBIndice.Text = "0";
+                            break;
+                        case 2:
+                            if (CBIndice.SelectedIndex == 2)
+                                CBIndice.Text = "0";
+                            break;
                     }
-                }
             }
         }
 
@@ -690,10 +691,10 @@ namespace Archivos
                 Registros reg = new Registros();    //Se crea el nuevo form
                 reg.EntAux1 = EntReg;   //Se guarda la entidad que se selecionó
                 reg.CreaRegistro(reg.EntAux1);  //Llama al método que crea el archivo 
-
+                reg.VerificaIndices();
                 reg.CreaColumnas();         //Crea las columnas dependiendo de los atributos que tiene la entidad
                 reg.ShowDialog();
-                //Cambia la dirección de datos, solo está en memoria
+                //Cambia la dirección de datos
                 if (reg.LRegistros1.Count > 0)
                 {
                     EntReg.DD = reg.LRegistros1[0].DR;
@@ -705,7 +706,7 @@ namespace Archivos
 
         private void CBIndice_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Clave();
+            ChecaIndices();
         }
 
         private void CBIndice_DrawItem(object sender, DrawItemEventArgs e)
