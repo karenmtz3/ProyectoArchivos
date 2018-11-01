@@ -698,7 +698,15 @@ namespace Archivos
                 if (reg.LRegistros1.Count > 0)
                 {
                     EntReg.DD = reg.LRegistros1[0].DR;
-                    AgregaFila();
+                    for(int i = 0; i < EntReg.LAtributo1.Count; i++)
+                    {
+                        Atributo a = EntReg.LAtributo1[i];
+                        //Checa índice secundario
+                        if (a.TI == 3)
+                            a.DI = reg.ISecundario1[0].DirInd;
+                    }
+                    //AgregaAtribDG();
+                    //AgregaFila();
                     Actualiza();
                 }
             }
