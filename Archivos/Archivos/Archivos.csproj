@@ -63,16 +63,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Atributo.cs" />
+    <Compile Include="BloquePrincipal.cs" />
     <Compile Include="Entidad.cs" />
-    <Compile Include="EspacioSec.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Indice.cs" />
     <Compile Include="Primario.cs" />
-    <Compile Include="Secundario.cs" />
     <Compile Include="Registro.cs" />
     <Compile Include="Registros.cs">
       <SubType>Form</SubType>
@@ -82,6 +82,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Secundario.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

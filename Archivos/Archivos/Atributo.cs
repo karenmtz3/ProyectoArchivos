@@ -14,7 +14,7 @@ namespace Archivos
         private long DirAtrib, DirIndice, DSAtrib;
         private char TipoDato;
         private int LongDato, TipoIndice;
-
+        
         public Atributo(string nombre, long DA, char TD, int LD, int TI,long DI, long DSA)
         {
             NombreAtrib = nombre;
@@ -24,6 +24,7 @@ namespace Archivos
             TipoDato = TD;
             LongDato = LD;
             TipoIndice = TI;
+
         }
         public void Limpia()
         {

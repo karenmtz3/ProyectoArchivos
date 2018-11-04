@@ -20,7 +20,8 @@ namespace Archivos
         long TamArch;
         int pos;
         long cabecera;
-        long cabeceraInd;
+
+        bool AbrirArch;
 
         private List<Registro> LRegistros;
         private Registro reg;
@@ -35,19 +36,14 @@ namespace Archivos
 
         int cb;
 
-        int posReg;
         int PosSec;
         int posPrim;
 
-        Atributo atrib;
-
-        //IndicePrim IPrimario;
-        List<Secundario> ISecundario;
-        List<Primario> IPrimario;
+        Indice Ind;
 
         public Entidad EntAux1 { get => EntAux; set => EntAux = value; }
         internal List<Registro> LRegistros1 { get => LRegistros; set => LRegistros = value; }
-        public List<Secundario> ISecundario1 { get => ISecundario; set => ISecundario = value; }
+        internal Indice Ind1 { get => Ind; set => Ind = value; }
 
         public Registros()
         {
@@ -57,12 +53,12 @@ namespace Archivos
             fin = new DataGridViewTextBoxColumn();
             abrir = new OpenFileDialog();
 
-            ISecundario = new List<Secundario>();
+            AbrirArch = false;
 
            posPrim = PosSec = -1;
-           posReg = 0;
 
         }
+        #region Registros
         //Se crea las columnas dinámicamente de acuerdo a los atributos que tiene una entidad
         public void CreaColumnas()
         {
@@ -84,13 +80,26 @@ namespace Archivos
             DGRegistros.Columns.Add(fin);
 
             //DataGrid para hacer las capturas de los registros
-            foreach (Atributo atrib in EntAux.LAtributo1)
+            for(int i = 0; i < EntAux.LAtributo1.Count; i++)
             {
+                Atributo atrib = EntAux.LAtributo1[i];
                 DataGridViewTextBoxColumn colum = new DataGridViewTextBoxColumn();
                 colum.HeaderText = atrib.NA;
                 colum.Width = 100;
                 DGCaptura.Columns.Add(colum);
+                //Se verifica para crear el archivo de índices
+                if (atrib.TI == 2)
+                {
+                    CreaArchIndice(atrib.TD, 1);
+                    posPrim = i;
+                }
+                else if(atrib.TI == 3)
+                {
+                    CreaArchIndice(atrib.TD, 2);
+                    PosSec = i;
+                }
             }
+            
         }
 
         //Pasa la información deL DataGrid de captura al DataGrid de los registros y lo agrega a la lista de registros
@@ -133,33 +142,7 @@ namespace Archivos
             ImprimeDataGrid();
             ImprimeLista();
         }
-        //Se actualiza la información que se encuentra en el archivo de índices
-        public void ActualizaIndices()
-        {
-            DireccionSigIndSec();
-            fs = File.Open(NomArchIdx, FileMode.Open, FileAccess.Write);
-            bw = new BinaryWriter(fs);
-            //fs.Seek(0, SeekOrigin.Begin);
-            foreach(Secundario sec in ISecundario)
-            {
-                fs.Seek(sec.DirInd, SeekOrigin.Begin);
-                if (EntAux.LAtributo1[PosSec].TD == 'E')
-                    sec.EscribeEnteros(bw);
-                else
-                {
-                    //Debug.WriteLine(sec.Nombre);
-                    sec.Escribe(bw);
-                }
-                //Se escribe el sub bloque con las nuevas direcciones
-                if (sec.DirB != -1)
-                {
-                    fs.Seek(sec.DirB, SeekOrigin.Begin);
-                    sec.EscribeSub(bw);
-                }
-            }
-            fs.Close();
-        }
-
+       
         public bool ClaveBusqueda()
         {
             for (int i = 0; i < EntAux.LAtributo1.Count; i++)
@@ -172,19 +155,6 @@ namespace Archivos
                 }
             }
             return false;
-        }
-
-        public void DireccionSigIndSec()
-        {
-            for (int i = 0; i < ISecundario.Count - 1; i++)
-            {
-                ISecundario[i].DirIndS = ISecundario[i + 1].DirInd;
-                if (ISecundario[i].SubSec1.Count > 0)
-                {
-                    for (int j = 0; j < ISecundario[i].SubSec1.Count-1; j++)
-                        ISecundario[i].SubSec1[j].DirESig1 = ISecundario[i].SubSec1[j + 1].DirE1;
-                }
-            }
         }
 
         //Actualiza la dirección del siguiente registro cuando hay más de un elemento en la lista
@@ -223,264 +193,6 @@ namespace Archivos
             fs.Close(); //Se cierra el archivo
         }
 
-        //Checa que existan atributos con índice primario o secundario
-        public void VerificaIndices()
-        {
-            for (int i = 0; i < EntAux.LAtributo1.Count;i++)
-            {
-                Atributo atrib = EntAux.LAtributo1[i];
-                if (atrib.TI != 0 && atrib.TI != 1)
-                {
-                    if (atrib.TI == 2)
-                        posPrim = i;
-                    if (atrib.TI == 3)
-                        PosSec = i;
-                    CreaIndices(atrib);
-                }
-            }
-            //Debug.WriteLine("El atributo que es índice secundario es " + EntAux.LAtributo1[PosSec].NA);
-
-        }
-
-        //Crea el archivo de índices
-        public void CreaIndices(Atributo atributo)
-        {
-            NomArchIdx = EntAux.NE + ".idx";
-            fs = new FileStream(NomArchIdx, FileMode.OpenOrCreate);
-            bw = new BinaryWriter(fs);
-
-            if (atributo.TI == 2)
-            {
-                string aux = "";
-                if (atributo.TD == 'E')
-                {
-                   
-                    for (int i = 1; i < 10; i++)
-                    {
-                        fs.Seek(fs.Length, SeekOrigin.Begin);
-                        aux = i.ToString();
-                        long dir = -1;
-                        Primario prim = new Primario(atributo, aux, fs.Length, dir);
-                        IPrimario.Add(prim);
-                        prim.EscribeEnteros(bw);
-                    }
-                }
-                else if (atributo.TD == 'C')
-                {
-                    string alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-                    char[] auxAlf = alfabeto.ToCharArray();
-                    for (int i = 0; i < auxAlf.Length; i++)
-                    {
-                        aux = auxAlf[i].ToString();
-                        long dir = -1;
-                        Primario prim = new Primario(atributo, aux, fs.Length, dir);
-                        IPrimario.Add(prim);
-                        prim.EscribeAlfabeto(bw);
-                    }
-                }
-                /*fs.Seek(fs.Length, SeekOrigin.Begin);
-                IPrimario = new IndicePrim(atributo);
-                IPrimario.CreaBPrincipal();
-                MuestraIndiceP(IPrimario);
-                IPrimario.EscribeBPrincipal(bw);*/
-            }
-            if(atributo.TI == 3)
-            {
-                string aux = "";
-                if (atributo.TD == 'E')
-                {
-                    for (int i = 1; i < 10; i++)
-                    {
-                        fs.Seek(fs.Length, SeekOrigin.Begin);
-                        aux = i.ToString();
-                        long dir = -1;
-                        Secundario sec = new Secundario(atributo, aux, dir, fs.Length,-1);
-                        ISecundario.Add(sec);
-                        sec.EscribeEnteros(bw);
-                    }
-                }
-                else if(atributo.TD == 'C')
-                {
-                    for(int i = 0; i < 50; i++)
-                    {
-                        fs.Seek(fs.Length, SeekOrigin.Begin);
-                        aux = "aux";
-                        long dir = -1;
-                        Secundario sec = new Secundario(atributo, aux, dir, fs.Length,-1);
-                        sec.ConvierteChar();
-                        ISecundario.Add(sec);
-                        
-                        sec.Escribe(bw);
-                    }
-                    
-
-                }
-                Debug.WriteLine(fs.Length);
-            }
-            fs.Close();
-            ActualizaIndices();
-            MuestraIndiceS();
-
-
-
-        }
-        //Método que muestra el bloque principal del índice primario
-        public void MuestraIndiceP(Primario prim)
-        {
-            /*List<string> AuxT = prim.LTipo1;
-            List<long> AuxD = prim.LDir1;
-            for (int i = 0; i < AuxT.Count; i++)
-            {
-                int n = DGPrimario.Rows.Add();
-                DGPrimario.Rows[n].Cells[0].Value = AuxT[i];
-                DGPrimario.Rows[n].Cells[1].Value = AuxD[i];
-            }*/
-        }
-
-        //Método que muestra el bloque principal del índice secundario
-        public void MuestraIndiceS()
-        {
-            DGSecundario.Rows.Clear();
-            for(int i = 0; i< ISecundario.Count; i++)
-            {
-                int n = DGSecundario.Rows.Add();
-                DGSecundario.Rows[n].Cells[0].Value = ISecundario[i].DirInd;
-                DGSecundario.Rows[n].Cells[1].Value = ISecundario[i].Nombre;
-                DGSecundario.Rows[n].Cells[2].Value = ISecundario[i].DirB;
-                DGSecundario.Rows[n].Cells[3].Value = ISecundario[i].DirIndS;
-
-            }
-        }
-
-        //Método que muestra los subbloques del índice secundario
-        public void MuestraSubSec()
-        {
-            DGIndices.Rows.Clear();
-            foreach(Secundario sec in ISecundario)
-            {
-                foreach(EspacioSec cajon in sec.SubSec1)
-                {
-                    int n = DGIndices.Rows.Add();
-                    DGIndices.Rows[n].Cells[0].Value = cajon.DirE1;
-                    DGIndices.Rows[n].Cells[1].Value = cajon.DirReg1;
-                    DGIndices.Rows[n].Cells[2].Value = cajon.DirESig1;
-                }
-
-            }
-        }
-
-        //Método para ingresar el elemento que es índice secundario en el bloque principal
-        public void AgregaElementoSec()
-        {
-            fs = File.Open(NomArchIdx, FileMode.Open, FileAccess.ReadWrite);
-            //fs.Seek(fs.Length, SeekOrigin.Begin);
-            bw = new BinaryWriter(fs);
-
-            for (int i = 0; i < ISecundario.Count; i++)
-            {
-                Secundario sec = ISecundario[i];
-                if(sec.Atrib.TD == 'E')
-                {
-                    //Cuando se agrega por primera vez
-                    if (sec.DirB == -1)
-                    {
-                        //sec.Nombre = LRegistros[posReg].Elementos[PosSec];
-                        //Ciclo para crear el sub bloque y agregar los 50 cajones
-                        sec.DirB = fs.Length;
-                        for (int j = 0; j < 50; j++)
-                        {
-                            EspacioSec cajoncito = new EspacioSec(fs.Length, -1, -1);
-                            sec.AgregaEsp(cajoncito);
-                            cajoncito.EscribeCajon(bw);
-                        }
-                        sec.SubSec1[i].DirReg1 = LRegistros[posReg].DR;
-
-                        //sec.CreaSubBloque();
-                        //sec.SubBloque1[i] = LRegistros[posReg].DR;
-                       
-                        //sec.EscribeSub(bw);
-                        i = ISecundario.Count;
-                    }
-                    else
-                    {
-                        int a = 0;
-                        MessageBox.Show("Ya esta agregado al bloque principal de secundarios");
-                        fs.Seek(sec.DirB, SeekOrigin.Begin);
-                        while (a < 50)
-                        {
-                            if (sec.SubSec1[a].DirReg1 == -1)
-                            {
-                                sec.SubSec1[a].DirReg1 = LRegistros[posReg].DR;
-                                a = ISecundario.Count;
-                            }
-                            else
-                                a++;
-                        }
-                        i = 49;
-                    }
-                    
-                }
-                if(sec.Atrib.TD == 'C')
-                {
-                    //Cuando se agrega por primera vez 
-                    if (sec.Nombre == "aux")
-                    {
-                        sec.DirB = fs.Length;
-                        sec.Nombre = LRegistros[posReg].Elementos[PosSec];
-                        for (int j = 0; j < 50; j++)
-                        {
-                            fs.Seek(fs.Length, SeekOrigin.Begin);
-                            EspacioSec cajoncito = new EspacioSec(fs.Length, -1, -1);
-                            sec.AgregaEsp(cajoncito);
-                            cajoncito.EscribeCajon(bw);
-                        }
-                        sec.SubSec1[0].DirReg1 = LRegistros[posReg].DR;
-                        /*sec.Nombre = LRegistros[posReg].Elementos[PosSec];
-                        sec.CreaSubBloque();
-                        sec.SubBloque1[i] = LRegistros[posReg].DR;
-                        sec.DirB = fs.Length;
-                        sec.EscribeSub(bw);*/
-                       
-                        i = ISecundario.Count;
-                    }
-                    else if (LRegistros[posReg].Elementos[PosSec] == sec.Nombre)
-                    {
-                        int a = i;
-                        MessageBox.Show("Ya esta agregado al bloque principal de secundarios");
-                        fs.Seek(sec.DirB, SeekOrigin.Begin);
-                        while (a < 50)
-                        {
-                            if (sec.SubSec1[a].DirReg1 == -1)
-                            {
-                                sec.SubSec1[a].DirReg1 = LRegistros[posReg].DR;
-                                a = ISecundario.Count;
-                            }
-                            else
-                                a++;
-                        }
-                        i = ISecundario.Count;
-                    }
-                    
-
-                }
-            }
-            posReg++;
-            fs.Close();
-
-            ActualizaIndices();
-            ImprimeIndice();
-            MuestraIndiceS();
-            MuestraSubSec();
-        }
-
-        //Imprime la lista de indices
-        public void ImprimeIndice()
-        {
-            foreach(Secundario s in ISecundario)
-            {
-                Debug.WriteLine(s.DirInd + " " + s.Nombre + " " + s.DirB + " " + s.DirIndS);
-            }
-        }
         //Imprime la información de los registros en consola
         public void ImprimeLista()
         {
@@ -511,67 +223,65 @@ namespace Archivos
         //Agrega un nuevo registro a la lista
         private void BtnAgregar_Click(object sender, EventArgs e)
         {
+            
             MuestraInf();
             DGCaptura.Rows.Clear();
-            if(posPrim != -1 || PosSec != -1)
-                AgregaElementoSec();
+            SubPrimario();
         }
 
         private void abrirToolStripMenuItem_Click(object sender, EventArgs e)
         {
             cabecera = EntAux.DD;
             long aux = 0;
+            AbrirArch = true;
+            CreaColumnas();
             LRegistros.Clear();
 
-            //abrir.Filter = "Registro de Datos(*.dat)|*.dat"; //Filtro de la extensión del archivo
-            if (abrir.ShowDialog() == DialogResult.OK)
+            fs = new FileStream(NomArch, FileMode.Open); //Se abre el archivo
+            fs.Seek(0, SeekOrigin.Begin);
+            //Se crea un BinaryReader y un BinaryWriter
+            br = new BinaryReader(fs);
+            bw = new BinaryWriter(fs);
+            aux = cabecera;
+            while (aux != -1)
             {
-                //abrir.FileName es el nombre del archivo seleccionado
-                fs = new FileStream(abrir.FileName, FileMode.Open); //Se abre el archivo
-                fs.Seek(0, SeekOrigin.Begin);
-                //Se crea un BinaryReader y un BinaryWriter
-                br = new BinaryReader(fs);
-                bw = new BinaryWriter(fs);
-                aux = cabecera;
-                while (aux != -1)
+                int valor;
+                int tam;
+                reg = new Registro(-1, -1);
+                fs.Seek(aux, SeekOrigin.Begin); //Se posiciona al inicio del archivo
+                long DirReg = br.ReadInt64(); //Lee la dirección del registro
+                for (int i = 0; i < EntAux.LAtributo1.Count; i++)
                 {
-                    int valor;
-                    int tam;
-                    reg = new Registro(-1, -1);
-                    fs.Seek(aux, SeekOrigin.Begin); //Se posiciona al inicio del archivo
-                    long DirReg = br.ReadInt64(); //Lee la dirección del registro
-                    for (int i = 0; i < EntAux.LAtributo1.Count; i++)
+                    if (EntAux.LAtributo1[i].TD == 'E')
                     {
-                        if (EntAux.LAtributo1[i].TD == 'E')
-                        {
-                            valor = br.ReadInt32();
-                            reg.Elementos.Add(valor.ToString());
-                        }
-                        else if (EntAux.LAtributo1[i].TD == 'C')
-                        {
-                            string valor2 = "";
-                            tam = EntAux.LAtributo1[i].LD;
-                            char[] nombre = br.ReadChars(tam);
-                            for (int j = 0; j < nombre.Length; j++)
-                            {
-                                if (char.IsLetter(nombre[j]) || nombre[j] =='_')
-                                    valor2 += nombre[j];
-                                else
-                                    j = tam;
-                            }
-                            reg.Elementos.Add(valor2);
-                        }
+                        valor = br.ReadInt32();
+                        reg.Elementos.Add(valor.ToString());
                     }
-                    long DirSReg = br.ReadInt64(); //Lee la dirección del siguiente registro
-                    reg.DR = DirReg;
-                    reg.DSR = DirSReg;
-                    aux = DirSReg;
-                    LRegistros.Add(reg);
+                    else if (EntAux.LAtributo1[i].TD == 'C')
+                    {
+                        string valor2 = "";
+                        tam = EntAux.LAtributo1[i].LD;
+                        char[] nombre = br.ReadChars(tam);
+                        for (int j = 0; j < nombre.Length; j++)
+                        {
+                            if (char.IsLetter(nombre[j]) || nombre[j] =='_')
+                                valor2 += nombre[j];
+                            else
+                                j = tam;
+                        }
+                        reg.Elementos.Add(valor2);
+                    }
                 }
-                fs.Close();
-                //ImprimeLista();
-                ImprimeDataGrid();
+                long DirSReg = br.ReadInt64(); //Lee la dirección del siguiente registro
+                reg.DR = DirReg;
+                reg.DSR = DirSReg;
+                aux = DirSReg;
+                LRegistros.Add(reg);
             }
+            fs.Close();
+            
+            //ImprimeLista();
+            ImprimeDataGrid();
         }
 
         private void BtnModificar_Click(object sender, EventArgs e)
@@ -589,7 +299,10 @@ namespace Archivos
         private void BtnEliminar_Click(object sender, EventArgs e)
         {
             string PElem = DGCaptura.Rows[0].Cells[0].Value.ToString();
-            for(int i = 0; i < LRegistros.Count; i++)
+            string elimInd = DGCaptura.Rows[0].Cells[posPrim].Value.ToString();
+            Debug.WriteLine(elimInd);
+            BuscaEnPrincipal(elimInd);
+            for (int i = 0; i < LRegistros.Count; i++)
             {
                 string aux = LRegistros[i].Elementos[0];
                 if (PElem == aux)
@@ -597,6 +310,7 @@ namespace Archivos
             }
             DGCaptura.Rows.Clear();
             Actualizar();
+            
         }
 
        
@@ -607,16 +321,227 @@ namespace Archivos
             {
                 string aux;
                 aux = DGRegistros.Rows[pos].Cells[i + 1].Value.ToString();
-                Debug.WriteLine(aux);
+                //Debug.WriteLine(aux);
                 DGCaptura.Rows[0].Cells[i].Value = aux;
              }
 
         }
+        #endregion
+        #region índices
+     
 
+        //Método que crea el archivo de índices
+        public void CreaArchIndice(char t,int TipoIndice)
+        {
+            NomArchIdx = EntAux.NE + ".idx";
+            if (AbrirArch)
+                AbrirIdx();
+            else
+            {
+                
+                //Se crea un nuevo FileStream con el nombre de la entidad y con extensión 'idx'
+                fs = new FileStream(NomArchIdx, FileMode.OpenOrCreate);
+                bw = new BinaryWriter(fs); //Se crea un BinaryWriter
+                Ind = new Indice(TipoIndice);
+
+                if (t == 'E')
+                {
+
+                    Ind.CreaIndice('E', bw, fs.Length);
+                }
+                else if (t == 'C')
+                {
+                    Ind.CreaIndice('C', bw, fs.Length);
+                }
+                MuestraPrimario();
+                fs.Close(); //Se cierra el archivo
+            }
+        }
+
+        public void AbrirIdx()
+        {
+            for (int i = 0; i < EntAux.LAtributo1.Count; i++)
+            {
+                Atributo a = EntAux.LAtributo1[i];
+                if (a.TI == 2)//Si es índice primario 
+                {
+                    Ind = new Indice(1);
+                    posPrim = i;
+                    long AuxDir = EntAux.LAtributo1[posPrim].DI;
+                    fs = new FileStream(NomArchIdx, FileMode.Open);
+                    fs.Seek(AuxDir, SeekOrigin.Begin);
+                    br = new BinaryReader(fs);
+                    if (a.TD == 'E')
+                    {
+                        Ind.Abrir(a.TD, br);
+                    }
+                    else if (a.TD == 'C')
+                    {
+                        Ind.Abrir(a.TD, br);
+                    }
+                    fs.Close();
+                    MuestraPrimario();
+                    break;
+                }
+                /* if (a.TI == 3) //Si es índice secundario
+                 {
+                     Ind = new Indice(2);
+                     PosSec = i;
+                 }*/
+            }
+        }
+
+
+        #region IndicePrimario
+        //Método que muestra el bloque principal del índice primario
+        public void MuestraPrimario()
+        {
+            DGPrimario.Rows.Clear();
+            foreach(BloquePrincipal b in Ind.Prim.BPrincipal1)
+            {
+                int n = DGPrimario.Rows.Add();
+                DGPrimario.Rows[n].Cells[0].Value = b.Valor;
+                DGPrimario.Rows[n].Cells[1].Value = b.Dir;
+            }
+        }
+
+        //Método que muestra el sub bloque de primario
+        public void MuestraSubPrim()
+        {
+            DGSubPrim.Rows.Clear();
+            Ind.Prim.SubBloque1 = Ind.Prim.SubBloque1.OrderBy(o => o.Valor).ToList();
+            foreach(BloquePrincipal b in Ind.Prim.SubBloque1)
+            {
+                if (b.Dir != -1)
+                {
+                    int n = DGSubPrim.Rows.Add();
+                    DGSubPrim.Rows[n].Cells[0].Value = b.Valor;
+                    DGSubPrim.Rows[n].Cells[1].Value = b.Dir;
+                }
+            }
+        }
+
+        //Se busca el espacio de donde pertenece el valor a eliminar
+        public void BuscaEnPrincipal(string nombre)
+        {
+            fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.Read);
+            br = new BinaryReader(fs);
+            char[] r = nombre.ToCharArray();
+            for(int i = 0; i < Ind.Prim.BPrincipal1.Count;i++)
+            {
+                BloquePrincipal b = Ind.Prim.BPrincipal1[i];
+                char letra = Convert.ToChar(b.Valor);
+                if (char.ToUpper(r[0]) == letra)
+                {
+                    fs.Seek(b.Dir, SeekOrigin.Begin);
+                   
+                    int tam = EntAux.LAtributo1[posPrim].LD;
+                    Ind.Prim.ActualizaSub(br, tam);
+                    fs.Close();
+
+                    Ind.Prim.Elimina(nombre);
+                    fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.Write);
+                    fs.Seek(b.Dir, SeekOrigin.Begin);
+                    bw = new BinaryWriter(fs);
+                    Ind.Prim.ActualizaSubBloque(bw);
+                    fs.Close();
+                }
+            }
+            MuestraSubPrim();
+        }
+        
+        //Se crean los sub bloques del primario para agregar un elemento
+        public void SubPrimario()
+        {
+            fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.Write);
+            string auxR = reg.Elementos[posPrim];
+            char[] R = auxR.ToCharArray();
+            for(int i = 0; i < Ind.Prim.BPrincipal1.Count; i++)
+            {
+                BloquePrincipal b = Ind.Prim.BPrincipal1[i];
+                char letra = Convert.ToChar(b.Valor);
+                if(char.ToUpper(R[0]) == letra)
+                {
+                    //Condición para crear el sub bloque 
+                    if(b.Dir == -1)
+                    {
+                        //Se actualiza el bloque principal
+                        b.Dir = fs.Length;
+                        fs.Seek(Ind.TamPrinPrim1, SeekOrigin.Begin);
+                        bw = new BinaryWriter(fs);
+                        Ind.Prim.ActualizaPrincipal(bw);
+
+                        //Se escribe el sub bloque al final del archivo
+                        fs.Seek(fs.Length, SeekOrigin.Begin);
+                        bw = new BinaryWriter(fs);
+                        int tam = EntAux.LAtributo1[posPrim].LD;
+                        Ind.Prim.CreaSubBloque(reg,tam,posPrim,bw);
+                        fs.Close();
+                        i = Ind.Prim.BPrincipal1.Count;
+                    }
+                    else
+                    {
+                        AgregaElemASubPrim(i);
+                    }
+                }
+            }
+            MuestraPrimario();
+            MuestraSubPrim();
+
+        }
+
+        //Método para agregar más elementos al sub-bloque
+        public void AgregaElemASubPrim(int posI)
+        {
+            fs.Close();
+            fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.Read);
+            br = new BinaryReader(fs);
+            fs.Seek(Ind.Prim.BPrincipal1[posI].Dir, SeekOrigin.Begin);
+            int tam = EntAux.LAtributo1[posPrim].LD;
+            Ind.Prim.ActualizaSub(br,tam);
+            fs.Close();
+
+            fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.Write);
+            fs.Seek(Ind.Prim.BPrincipal1[posI].Dir, SeekOrigin.Begin);
+            bw = new BinaryWriter(fs);
+            Ind.Prim.AgregaElem(reg, posPrim,bw);
+            fs.Close();
+            MuestraSubPrim();
+
+           
+        }
+        //Si se selecciona una celda con dirección de sub bloque se visualizará la información en el DGSubPrim
+        private void DGPrimario_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            long aux = Convert.ToInt64(DGPrimario[1, e.RowIndex].Value);
+            if (aux != -1)
+            {
+                fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.Read);
+                fs.Seek(aux, SeekOrigin.Begin);
+                br = new BinaryReader(fs);
+                int tam = EntAux.LAtributo1[posPrim].LD;
+                Ind.Prim.ActualizaSub(br,tam);
+                fs.Close();
+                MuestraSubPrim();
+               
+            }
+            else
+                MessageBox.Show("No existe sub bloque");
+
+        }
+        #endregion
+
+        #region IndiceSecundario
+
+        #endregion
+
+
+
+        #endregion
 
         private void AbrirIndice_Click(object sender, EventArgs e)
         {
-            long aux = 0;
+           /* long aux = 0;
             
             ISecundario.Clear();
             for (int i = 0; i < EntAux.LAtributo1.Count; i++)
@@ -665,11 +590,15 @@ namespace Archivos
 
                             }
                         }*/
-                    }
-                }
-            }
+                   // }
+               // }
+           // }
 
         }
 
+        private void cargarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CreaColumnas();
+        }
     }
 }

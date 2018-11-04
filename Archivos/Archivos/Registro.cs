@@ -9,7 +9,7 @@ using System.IO;
 
 namespace Archivos
 {
-    class Registro
+   public class Registro
     {
         private List<string> elementos;
         private List<string> LAux;

@@ -691,8 +691,7 @@ namespace Archivos
                 Registros reg = new Registros();    //Se crea el nuevo form
                 reg.EntAux1 = EntReg;   //Se guarda la entidad que se selecionó
                 reg.CreaRegistro(reg.EntAux1);  //Llama al método que crea el archivo 
-                reg.VerificaIndices();
-                reg.CreaColumnas();         //Crea las columnas dependiendo de los atributos que tiene la entidad
+                //reg.CreaColumnas();         //Crea las columnas dependiendo de los atributos que tiene la entidad
                 reg.ShowDialog();
                 //Cambia la dirección de datos
                 if (reg.LRegistros1.Count > 0)
@@ -701,9 +700,9 @@ namespace Archivos
                     for(int i = 0; i < EntReg.LAtributo1.Count; i++)
                     {
                         Atributo a = EntReg.LAtributo1[i];
-                        //Checa índice secundario
-                        if (a.TI == 3)
-                            a.DI = reg.ISecundario1[0].DirInd;
+                        //Checa índice primario
+                        if (a.TI == 2)
+                            a.DI = reg.Ind1.TamPrinPrim1;
                     }
                     //AgregaAtribDG();
                     //AgregaFila();
