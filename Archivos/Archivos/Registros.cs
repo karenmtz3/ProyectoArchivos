@@ -286,14 +286,34 @@ namespace Archivos
 
         private void BtnModificar_Click(object sender, EventArgs e)
         {
+            //Se guarda el registro a modificar
+            Registro r = LRegistros[pos];
+            string IndPrim = "";
+            if(posPrim != -1)// || PosSec !=-1
+                //Se guarda el elemento que es indice primario
+                IndPrim = LRegistros[pos].Elementos[posPrim];
             for (int j = 0; j < DGCaptura.ColumnCount; j++)
             {
+                //Se captura el valor que está renglón 0 columna j
                 string aux = DGCaptura.Rows[0].Cells[j].Value.ToString();
+                //se pasan los nuevos valores en las posiciones correspondientes en el DG de registros
                 DGRegistros.Rows[pos].Cells[j + 1].Value = aux;
+                //Se pasan los nuevos valores a la lista de registros
                 LRegistros[pos].Elementos[j] = aux;
             }
             DGCaptura.Rows.Clear();
             Actualizar();
+
+            if(posPrim !=-1)
+            {
+                reg = LRegistros[pos];
+                string nuevo = LRegistros[pos].Elementos[posPrim];
+                if(IndPrim != nuevo)
+                {
+                    BuscaEnPrincipal(IndPrim);
+                    SubPrimario();
+                }
+            }
         }
 
         private void BtnEliminar_Click(object sender, EventArgs e)
@@ -422,29 +442,58 @@ namespace Archivos
         }
 
         //Se busca el espacio de donde pertenece el valor a eliminar
+        //Para índice primario
         public void BuscaEnPrincipal(string nombre)
         {
             fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.Read);
             br = new BinaryReader(fs);
             char[] r = nombre.ToCharArray();
-            for(int i = 0; i < Ind.Prim.BPrincipal1.Count;i++)
-            {
-                BloquePrincipal b = Ind.Prim.BPrincipal1[i];
-                char letra = Convert.ToChar(b.Valor);
-                if (char.ToUpper(r[0]) == letra)
-                {
-                    fs.Seek(b.Dir, SeekOrigin.Begin);
-                   
-                    int tam = EntAux.LAtributo1[posPrim].LD;
-                    Ind.Prim.ActualizaSub(br, tam);
-                    fs.Close();
 
-                    Ind.Prim.Elimina(nombre);
-                    fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.Write);
-                    fs.Seek(b.Dir, SeekOrigin.Begin);
-                    bw = new BinaryWriter(fs);
-                    Ind.Prim.ActualizaSubBloque(bw);
-                    fs.Close();
+            if(Ind.Prim.TipoDato1 == 'E')
+            {
+                for(int i = 0; i < Ind.Prim.BPrincipal1.Count; i++)
+                {
+                    BloquePrincipal b = Ind.Prim.BPrincipal1[i];
+                    char num = Convert.ToChar(b.Valor);
+                    if(r[0] == num)
+                    {
+                        fs.Seek(b.Dir, SeekOrigin.Begin);
+                        int tam = EntAux.LAtributo1[posPrim].LD;
+                        Ind.Prim.ActualizaSub(br, tam);
+                        fs.Close();
+
+                        Ind.Prim.Elimina(nombre);
+                        fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.Write);
+                        fs.Seek(b.Dir, SeekOrigin.Begin);
+                        bw = new BinaryWriter(fs);
+                        Ind.Prim.ActualizaSubBloque(bw);
+                        fs.Close();
+                        i = Ind.Prim.BPrincipal1.Count;
+                    }
+                }
+            }
+            else if (Ind.Prim.TipoDato1 == 'C')
+            {
+                for (int i = 0; i < Ind.Prim.BPrincipal1.Count; i++)
+                {
+                    BloquePrincipal b = Ind.Prim.BPrincipal1[i];
+                    char letra = Convert.ToChar(b.Valor);
+                    if (char.ToUpper(r[0]) == letra)
+                    {
+                        fs.Seek(b.Dir, SeekOrigin.Begin);
+
+                        int tam = EntAux.LAtributo1[posPrim].LD;
+                        Ind.Prim.ActualizaSub(br, tam);
+                        fs.Close();
+
+                        Ind.Prim.Elimina(nombre);
+                        fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.Write);
+                        fs.Seek(b.Dir, SeekOrigin.Begin);
+                        bw = new BinaryWriter(fs);
+                        Ind.Prim.ActualizaSubBloque(bw);
+                        fs.Close();
+                        i = Ind.Prim.BPrincipal1.Count;
+                    }
                 }
             }
             MuestraSubPrim();
@@ -456,32 +505,63 @@ namespace Archivos
             fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.Write);
             string auxR = reg.Elementos[posPrim];
             char[] R = auxR.ToCharArray();
-            for(int i = 0; i < Ind.Prim.BPrincipal1.Count; i++)
+            if (Ind.Prim.TipoDato1 == 'E')
             {
-                BloquePrincipal b = Ind.Prim.BPrincipal1[i];
-                char letra = Convert.ToChar(b.Valor);
-                if(char.ToUpper(R[0]) == letra)
+                for (int i = 0; i < Ind.Prim.BPrincipal1.Count; i++)
                 {
-                    //Condición para crear el sub bloque 
-                    if(b.Dir == -1)
+                    BloquePrincipal b = Ind.Prim.BPrincipal1[i];
+                    char numero = Convert.ToChar(b.Valor);
+                    if (R[0] == numero)
                     {
-                        //Se actualiza el bloque principal
-                        b.Dir = fs.Length;
-                        fs.Seek(Ind.TamPrinPrim1, SeekOrigin.Begin);
-                        bw = new BinaryWriter(fs);
-                        Ind.Prim.ActualizaPrincipal(bw);
+                        //Condición para crear el sub bloque 
+                        if (b.Dir == -1)
+                        {
+                            //Se actualiza el bloque principal
+                            b.Dir = fs.Length;
+                            fs.Seek(Ind.TamPrinPrim1, SeekOrigin.Begin);
+                            bw = new BinaryWriter(fs);
+                            Ind.Prim.ActualizaPrincipal(bw);
 
-                        //Se escribe el sub bloque al final del archivo
-                        fs.Seek(fs.Length, SeekOrigin.Begin);
-                        bw = new BinaryWriter(fs);
-                        int tam = EntAux.LAtributo1[posPrim].LD;
-                        Ind.Prim.CreaSubBloque(reg,tam,posPrim,bw);
-                        fs.Close();
-                        i = Ind.Prim.BPrincipal1.Count;
+                            //Se escribe el sub bloque al final del archivo
+                            fs.Seek(fs.Length, SeekOrigin.Begin);
+                            bw = new BinaryWriter(fs);
+                            int tam = EntAux.LAtributo1[posPrim].LD;
+                            Ind.Prim.CreaSubBloque(reg, tam, posPrim, bw);
+                            fs.Close();
+                            i = Ind.Prim.BPrincipal1.Count;
+                        }
+                        else
+                            AgregaElemASubPrim(i);
                     }
-                    else
+                }
+            }
+            else if (Ind.Prim.TipoDato1 == 'C')
+            {
+                for (int i = 0; i < Ind.Prim.BPrincipal1.Count; i++)
+                {
+                    BloquePrincipal b = Ind.Prim.BPrincipal1[i];
+                    char letra = Convert.ToChar(b.Valor);
+                    if (char.ToUpper(R[0]) == letra)
                     {
-                        AgregaElemASubPrim(i);
+                        //Condición para crear el sub bloque 
+                        if (b.Dir == -1)
+                        {
+                            //Se actualiza el bloque principal
+                            b.Dir = fs.Length;
+                            fs.Seek(Ind.TamPrinPrim1, SeekOrigin.Begin);
+                            bw = new BinaryWriter(fs);
+                            Ind.Prim.ActualizaPrincipal(bw);
+
+                            //Se escribe el sub bloque al final del archivo
+                            fs.Seek(fs.Length, SeekOrigin.Begin);
+                            bw = new BinaryWriter(fs);
+                            int tam = EntAux.LAtributo1[posPrim].LD;
+                            Ind.Prim.CreaSubBloque(reg, tam, posPrim, bw);
+                            fs.Close();
+                            i = Ind.Prim.BPrincipal1.Count;
+                        }
+                        else
+                            AgregaElemASubPrim(i);
                     }
                 }
             }

@@ -27,6 +27,7 @@ namespace Archivos
 
         internal List<BloquePrincipal> BPrincipal1 { get => BPrincipal; set => BPrincipal = value; }
         internal List<BloquePrincipal> SubBloque1 { get => SubBloque; set => SubBloque = value; }
+        public char TipoDato1 { get => TipoDato; set => TipoDato = value; }
 
         //Método que crea y escribe el bloque principal de primario
         public void CreaBloquePrincipal(BinaryWriter bw)
@@ -134,21 +135,35 @@ namespace Archivos
         {
             tam = t;
             SubBloque.Clear();
-            for(int i = 0; i < 100; i++)
+            if (TipoDato == 'E')
             {
-                string v = "";
-                char[] valor = br.ReadChars(tam);
-                long d = br.ReadInt64();
-                foreach (char c in valor)
-                    if (char.IsLetter(c))
-                        v += c;
-                BloquePrincipal b = new BloquePrincipal(v);
-                b.Dir = d;
-                SubBloque.Add(b);
-                if (d != -1)
-                    PosP += 1;
-
-
+                for (int i = 0; i < 100; i++)
+                {
+                    int num = br.ReadInt32();
+                    long d = br.ReadInt64();
+                    BloquePrincipal b = new BloquePrincipal(num.ToString());
+                    b.Dir = d;
+                    SubBloque.Add(b);
+                    if (d != -1)
+                        PosP += 1;
+                }
+            }
+            else if (TipoDato == 'C')
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    string v = "";
+                    char[] valor = br.ReadChars(tam);
+                    long d = br.ReadInt64();
+                    foreach (char c in valor)
+                        if (char.IsLetter(c))
+                            v += c;
+                    BloquePrincipal b = new BloquePrincipal(v);
+                    b.Dir = d;
+                    SubBloque.Add(b);
+                    if (d != -1)
+                        PosP += 1;
+                }
             }
         }
 
@@ -161,7 +176,11 @@ namespace Archivos
                 {
                     BloquePrincipal b = SubBloque[i];
                     if (reg == b.Valor)
+                    {
+                        b.Dir = -1;
                         Debug.WriteLine("El elemento a eliminar es " + b.Valor);
+                        break;
+                    }
                 }
             }
             else if(TipoDato == 'C')
@@ -209,7 +228,7 @@ namespace Archivos
         {
             if (TipoDato == 'E')
             {
-                for (int i = 1; i < BPrincipal.Count; i++)
+                for (int i = 0; i < BPrincipal.Count; i++)
                 {
                     BloquePrincipal b = BPrincipal[i];
                     int n = Convert.ToInt32(b.Valor);
