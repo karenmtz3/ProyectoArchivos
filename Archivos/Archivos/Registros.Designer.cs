@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.cargarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.abrirToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Registro = new System.Windows.Forms.TabControl();
@@ -48,12 +49,12 @@
             this.Valor = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Direccion = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.CBAtribSec = new System.Windows.Forms.ComboBox();
             this.DGSubSec = new System.Windows.Forms.DataGridView();
             this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DGSecundario = new System.Windows.Forms.DataGridView();
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.cargarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.Registro.SuspendLayout();
             this.TabRegistro.SuspendLayout();
@@ -78,6 +79,13 @@
             this.menuStrip1.Size = new System.Drawing.Size(844, 24);
             this.menuStrip1.TabIndex = 10;
             this.menuStrip1.Text = "menuStrip1";
+            // 
+            // cargarToolStripMenuItem
+            // 
+            this.cargarToolStripMenuItem.Name = "cargarToolStripMenuItem";
+            this.cargarToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
+            this.cargarToolStripMenuItem.Text = "cargar";
+            this.cargarToolStripMenuItem.Click += new System.EventHandler(this.cargarToolStripMenuItem_Click);
             // 
             // abrirToolStripMenuItem
             // 
@@ -268,6 +276,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.CBAtribSec);
             this.tabPage3.Controls.Add(this.DGSubSec);
             this.tabPage3.Controls.Add(this.DGSecundario);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
@@ -277,6 +286,15 @@
             this.tabPage3.TabIndex = 3;
             this.tabPage3.Text = "Índice Secundario";
             this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // CBAtribSec
+            // 
+            this.CBAtribSec.FormattingEnabled = true;
+            this.CBAtribSec.Location = new System.Drawing.Point(24, 22);
+            this.CBAtribSec.Name = "CBAtribSec";
+            this.CBAtribSec.Size = new System.Drawing.Size(121, 21);
+            this.CBAtribSec.TabIndex = 26;
+            this.CBAtribSec.SelectedIndexChanged += new System.EventHandler(this.CBAtribSec_SelectedIndexChanged);
             // 
             // DGSubSec
             // 
@@ -314,6 +332,7 @@
             this.DGSecundario.ReadOnly = true;
             this.DGSecundario.Size = new System.Drawing.Size(313, 301);
             this.DGSecundario.TabIndex = 24;
+            this.DGSecundario.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DGSecundario_CellClick);
             // 
             // Column1
             // 
@@ -327,13 +346,6 @@
             this.Column2.HeaderText = "Dirección";
             this.Column2.Name = "Column2";
             this.Column2.ReadOnly = true;
-            // 
-            // cargarToolStripMenuItem
-            // 
-            this.cargarToolStripMenuItem.Name = "cargarToolStripMenuItem";
-            this.cargarToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
-            this.cargarToolStripMenuItem.Text = "cargar";
-            this.cargarToolStripMenuItem.Click += new System.EventHandler(this.cargarToolStripMenuItem_Click);
             // 
             // Registros
             // 
@@ -390,5 +402,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column4;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
         private System.Windows.Forms.ToolStripMenuItem cargarToolStripMenuItem;
+        private System.Windows.Forms.ComboBox CBAtribSec;
     }
 }

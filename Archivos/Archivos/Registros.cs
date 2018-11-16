@@ -17,11 +17,11 @@ namespace Archivos
         private Entidad EntAux;
         private string NomArch;
         private string NomArchIdx;
-        long TamArch;
-        int pos;
-        long cabecera;
+        private long TamArch;
+        private int pos;
+        private long cabecera;
 
-        bool AbrirArch;
+        private bool AbrirArch;
 
         private List<Registro> LRegistros;
         private Registro reg;
@@ -34,10 +34,14 @@ namespace Archivos
         private BinaryWriter bw;
         private BinaryReader br;
 
-        int cb;
+        private int cb;
 
+        //índices secundarios
+        List<Atributo> AtribSec;
+        Secundario ElemSec;
         int PosSec;
-        int posPrim;
+
+        private int posPrim;
 
         Indice Ind;
 
@@ -55,7 +59,10 @@ namespace Archivos
 
             AbrirArch = false;
 
-           posPrim = PosSec = -1;
+            AtribSec = new List<Atributo>();
+
+            //PosSec = - 1;
+           posPrim = -1;
 
         }
         #region Registros
@@ -63,7 +70,7 @@ namespace Archivos
         public void CreaColumnas()
         {
             label2.Text = EntAux.NE;
-
+            //bool P = false, S = false;
             inicio.HeaderText = "Dirección de Registro";
             inicio.Width = 80;
             DGRegistros.Columns.Add(inicio);
@@ -90,15 +97,20 @@ namespace Archivos
                 //Se verifica para crear el archivo de índices
                 if (atrib.TI == 2)
                 {
+                    //P = true;
                     CreaArchIndice(atrib.TD, 1);
                     posPrim = i;
                 }
                 else if(atrib.TI == 3)
                 {
-                    CreaArchIndice(atrib.TD, 2);
-                    PosSec = i;
+                    AtribSec.Add(atrib);
+                    //S = true;
+                    //CreaArchIndice(atrib.TD, 2);
+                    //PosSec = i;
                 }
             }
+            if (AtribSec.Count > 0)
+                CreaArchIndice(AtribSec[0].TD, 2);
             
         }
 
@@ -223,10 +235,19 @@ namespace Archivos
         //Agrega un nuevo registro a la lista
         private void BtnAgregar_Click(object sender, EventArgs e)
         {
-            
             MuestraInf();
+            for(int i = 0; i < DGCaptura.ColumnCount; i++)
+            {
+                Atributo a = EntAux.LAtributo1[i];
+                if(a.TI == 2) //Si es índice primario crea el bloque principal
+                    SubPrimario();
+                else if(a.TI == 3) //Si hay índices secudarios, agrega el valor al bloque principal y la dirección al sub-bloque
+                {
+                    string v = (string)DGCaptura.Rows[0].Cells[i].Value;
+                    AgregaPrinSec(a.NA, v,a.LD);
+                }
+            }
             DGCaptura.Rows.Clear();
-            SubPrimario();
         }
 
         private void abrirToolStripMenuItem_Click(object sender, EventArgs e)
@@ -358,22 +379,30 @@ namespace Archivos
                 AbrirIdx();
             else
             {
-                
                 //Se crea un nuevo FileStream con el nombre de la entidad y con extensión 'idx'
                 fs = new FileStream(NomArchIdx, FileMode.OpenOrCreate);
                 bw = new BinaryWriter(fs); //Se crea un BinaryWriter
                 Ind = new Indice(TipoIndice);
 
-                if (t == 'E')
+                if (TipoIndice == 2)
                 {
+                    for (int i = 0; i < AtribSec.Count; i++)
+                    {
+                        Atributo a = AtribSec[i];
+                        Debug.WriteLine(fs.Length);
+                        Ind.CreaSec(a.TD, bw, fs.Length, a.LD,a.NA);
+                    }
+                    Debug.WriteLine(fs.Length);
+                }
+                else if (TipoIndice == 1)
+                {
+                    if (t == 'E')
+                        Ind.CreaIndice('E', bw, fs.Length);
+                    else if (t == 'C')
+                        Ind.CreaIndice('C', bw, fs.Length);
 
-                    Ind.CreaIndice('E', bw, fs.Length);
+                    MuestraPrimario();
                 }
-                else if (t == 'C')
-                {
-                    Ind.CreaIndice('C', bw, fs.Length);
-                }
-                MuestraPrimario();
                 fs.Close(); //Se cierra el archivo
             }
         }
@@ -611,74 +640,171 @@ namespace Archivos
         }
         #endregion
 
+
         #region IndiceSecundario
 
         #endregion
-
-
-
-        #endregion
-
-        private void AbrirIndice_Click(object sender, EventArgs e)
+        //Método que llena el combo box de los atributos que son índices secundarios
+        public void LlenaCB()
         {
-           /* long aux = 0;
-            
-            ISecundario.Clear();
-            for (int i = 0; i < EntAux.LAtributo1.Count; i++)
+            //Se limpia el combo box de las entidades 
+            CBAtribSec.Items.Clear();
+            //Ciclo para agregar las entidades al combo box
+            foreach (Atributo atrib in AtribSec)
+                CBAtribSec.Items.Add(atrib.NA);
+        }
+
+
+        //Método para agregar elementos al bloque principal 
+        public void AgregaPrinSec(string NA, string valor, int tam)
+        {
+            fs = File.Open(NomArchIdx, FileMode.Open, FileAccess.ReadWrite);
+            br = new BinaryReader(fs);
+            int PS = Ind.EncuentraSec(NA);
+            Secundario sec = Ind.Secundarios[PS];
+            fs.Seek(sec.TamPrin1, SeekOrigin.Begin);
+            sec.LeePricipal(br, tam);
+            for (int i = 0; i < sec.Principal1.Count; i++)
             {
-                Atributo a = EntAux.LAtributo1[i];
-                if (a.TI == 3)
+                BloquePrincipal b = sec.Principal1[i];
+                Debug.WriteLine(b.Valor);
+                string aux2 = int.MaxValue.ToString();
+                if(b.Valor == "" || b.Valor == aux2) // si lo que esta en el bloque es vacío se agrega el elemento
                 {
-                    cabeceraInd = a.DI;
-                    PosSec = i;
-                    atrib = a;
+                    //Se asignan los nuevos valores y se actualiza el bloque principal
+                    b.Valor = valor;
+                    b.Dir = fs.Length;
+                    fs.Seek(sec.TamPrin1, SeekOrigin.Begin);
+                    bw = new BinaryWriter(fs);
+                    sec.ActualizaPrincipal(bw);
+
+                    //una vez actualizado se crea el sub-bloque de direcciones
+                    fs.Seek(fs.Length, SeekOrigin.Begin);
+                    bw = new BinaryWriter(fs);
+                    sec.CreaSubBloque(reg.DR,bw);
+                    fs.Close();
+                    i = sec.Principal1.Count;
+                }
+                else if(b.Valor == valor) //Si se encuentra el elemento en el bloque principal se agrega la dirección al sub-bloque
+                {
+                    long P = sec.Principal1[i].Dir;
+                    AgregaDirSec(sec,P, reg.DR);
+                    i = sec.Principal1.Count;
+                    fs.Close();
                 }
             }
+            //fs.Close();
+        }
 
-            fs = new FileStream(NomArchIdx, FileMode.Open); //Se abre el archivo
-            fs.Seek(0, SeekOrigin.Begin);
-            //Se crea un BinaryReader y un BinaryWriter
+        //Método que agrega direcciónes al sub-bloque
+        public void AgregaDirSec(Secundario s,long dir, long DR)
+        {
+            fs.Seek(dir, SeekOrigin.Begin);
             br = new BinaryReader(fs);
+            s.LlenaSub(br); //Se leer el sub-bloque
+
+            fs.Seek(dir, SeekOrigin.Begin);
             bw = new BinaryWriter(fs);
-            aux = cabeceraInd;
-            while(aux != -1)
-            {
-                fs.Seek(aux, SeekOrigin.Begin);
-                string nomb ="";
-                if(atrib.TI == 3)
-                {
-                    if(atrib.TD == 'E')
-                    {
-
-                    }
-                    if(atrib.TD == 'C')
-                    {
-                        char[] Nombre = br.ReadChars(atrib.LD);
-                        foreach(char c in Nombre)
-                        {
-                            if (char.IsLetter(c))
-                                nomb += c;
-                        }
-                        long dirB = br.ReadInt64();
-
-                        /*if(dirB != -1)
-                        {
-                            long aux2 = dirB;
-                            while(aux2 != -1)
-                            {
-                                fs.Seek(aux2, SeekOrigin.Begin);
-
-                            }
-                        }*/
-                   // }
-               // }
-           // }
+            s.AgregaSub(DR, bw);
 
         }
+        //Método que busca el atributo que se selecciono en el combo box
+        public void BuscaSecundario()
+        {
+            //Ciclo para recorrer la lista de entidades
+            for (int i = 0; i < AtribSec.Count; i++)
+            {
+                //Se busca el nombre de la entidad a modificar en la lista de entidades
+                if (CBAtribSec.Text == AtribSec[i].NA)
+                {
+                    PosSec = i;
+                    //AtributoS = AtribSec[i];
+                }
+            }
+        }
+
+        //Método para visualizar el bloque principal de secundarios
+        public void MuestraPrinSec()
+        {
+            DGSecundario.Rows.Clear();
+            ElemSec.Principal1 = ElemSec.Principal1.OrderBy(o => o.Valor).ToList();
+            foreach (BloquePrincipal b in ElemSec.Principal1)
+            {
+                if (b.Dir != -1)
+                {
+                    int n = DGSecundario.Rows.Add();
+                    DGSecundario.Rows[n].Cells[0].Value = b.Valor;
+                    DGSecundario.Rows[n].Cells[1].Value = b.Dir;
+                }
+            }
+        }
+
+        //Método para visualizar el sub-bloque de secundarios
+        public void MuestraSubSec()
+        {
+            DGSubSec.Rows.Clear();
+            foreach (long dir in ElemSec.SubB1)
+            {
+                if (dir != -1)
+                {
+                    int n = DGSubSec.Rows.Add();
+                    DGSubSec.Rows[n].Cells[0].Value = dir;
+                }
+            }
+        }
+        #endregion
 
         private void cargarToolStripMenuItem_Click(object sender, EventArgs e)
         {
             CreaColumnas();
+            LlenaCB();
+        }
+        
+        public int LongDato(string CBSec)
+        {
+            int LD = 0;
+            foreach (Atributo a in EntAux.LAtributo1)
+            {
+                if (a.NA == CBSec)
+                {
+                    LD = a.LD;
+                    break;
+                }
+            }
+            return LD;
+        }
+
+        private void CBAtribSec_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            BuscaSecundario();
+            DGSubSec.Rows.Clear();
+            int tam = LongDato(CBAtribSec.Text);
+            ElemSec = Ind.Secundarios[PosSec];
+            fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.ReadWrite);
+            fs.Seek(ElemSec.TamPrin1, SeekOrigin.Begin);
+            br = new BinaryReader(fs);
+            ElemSec.LeePricipal(br, tam);
+            fs.Close();
+            MuestraPrinSec();
+        }
+
+        private void DGSecundario_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            long aux = Convert.ToInt64(DGSecundario[1, e.RowIndex].Value);
+            if (aux != -1)
+            {
+                fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.Read);
+                fs.Seek(aux, SeekOrigin.Begin);
+                br = new BinaryReader(fs);
+                BuscaSecundario();
+                ElemSec = Ind.Secundarios[PosSec];
+                ElemSec.LeeSub(br);
+                fs.Close();
+                MuestraSubSec();
+
+            }
+            else
+                MessageBox.Show("No existe sub bloque");
         }
     }
 }

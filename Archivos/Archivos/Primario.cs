@@ -58,7 +58,7 @@ namespace Archivos
             } 
         }
 
-        //Método que crea el sub bloque
+        //Método que crea el sub bloque y lo escribe en el archivo
         public void CreaSubBloque(Registro r, int t, int pos,BinaryWriter bw)
         {
             SubBloque.Clear();
