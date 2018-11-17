@@ -111,7 +111,7 @@ namespace Archivos
         }
 
         //Método que escribe en el archivo los nuevos cambios del principal
-        public void ActualizaPrincipal(BinaryWriter bw)
+        public void ActualizaPrincipal(BinaryWriter bw, int t)
         {
             if(TDato == 'E')
             {
@@ -125,6 +125,7 @@ namespace Archivos
             }
             if(TDato == 'C')
             {
+                tam = t;
                 for(int i = 0; i < Principal.Count; i++)
                 {
                     BloquePrincipal b = Principal[i];

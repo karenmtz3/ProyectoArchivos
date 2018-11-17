@@ -40,6 +40,9 @@ namespace Archivos
         List<Atributo> AtribSec;
         Secundario ElemSec;
         int PosSec;
+        bool ExisteSec;
+
+        bool ExisteIndice;
 
         private int posPrim;
 
@@ -57,6 +60,7 @@ namespace Archivos
             fin = new DataGridViewTextBoxColumn();
             abrir = new OpenFileDialog();
 
+            ExisteIndice = ExisteSec = false;
             AbrirArch = false;
 
             AtribSec = new List<Atributo>();
@@ -95,22 +99,27 @@ namespace Archivos
                 colum.Width = 100;
                 DGCaptura.Columns.Add(colum);
                 //Se verifica para crear el archivo de índices
-                if (atrib.TI == 2)
+                if (atrib.TI == 2 || atrib.TI == 3)
                 {
                     //P = true;
                     CreaArchIndice(atrib.TD, 1);
                     posPrim = i;
+                    //i = EntAux.LAtributo1.Count;
                 }
-                else if(atrib.TI == 3)
+                /*else if(atrib.TI == 5)
                 {
                     AtribSec.Add(atrib);
+                    if (AbrirArch)
+                        ExisteSec = true;
                     //S = true;
                     //CreaArchIndice(atrib.TD, 2);
                     //PosSec = i;
-                }
+                }*/
             }
-            if (AtribSec.Count > 0)
+            if (AtribSec.Count > 0 && ExisteSec == false)
                 CreaArchIndice(AtribSec[0].TD, 2);
+            //if (ExisteSec == true)
+               // CreaArchIndice(AtribSec[0].TD, 2);
             
         }
 
@@ -340,9 +349,13 @@ namespace Archivos
         private void BtnEliminar_Click(object sender, EventArgs e)
         {
             string PElem = DGCaptura.Rows[0].Cells[0].Value.ToString();
-            string elimInd = DGCaptura.Rows[0].Cells[posPrim].Value.ToString();
-            Debug.WriteLine(elimInd);
-            BuscaEnPrincipal(elimInd);
+            string elimPrim = "";
+            if (posPrim != -1)
+            {
+                elimPrim = DGCaptura.Rows[0].Cells[posPrim].Value.ToString();
+                Debug.WriteLine(elimPrim);
+                BuscaEnPrincipal(elimPrim);
+            }
             for (int i = 0; i < LRegistros.Count; i++)
             {
                 string aux = LRegistros[i].Elementos[0];
@@ -376,26 +389,44 @@ namespace Archivos
         {
             NomArchIdx = EntAux.NE + ".idx";
             if (AbrirArch)
-                AbrirIdx();
+            {
+                if (ExisteIndice == false)
+                {
+                    Ind = new Indice(1);
+                    ExisteIndice = true;
+                    AbrirIdx();
+                }
+            }
             else
             {
-                //Se crea un nuevo FileStream con el nombre de la entidad y con extensión 'idx'
-                fs = new FileStream(NomArchIdx, FileMode.OpenOrCreate);
-                bw = new BinaryWriter(fs); //Se crea un BinaryWriter
-                Ind = new Indice(TipoIndice);
-
-                if (TipoIndice == 2)
+                if(ExisteIndice == true)
+                    //Se crea un nuevo FileStream con el nombre de la entidad y con extensión 'idx'
+                    fs = new FileStream(NomArchIdx, FileMode.OpenOrCreate);
+                else
                 {
+                    Ind = new Indice(1);
+                    fs = new FileStream(NomArchIdx, FileMode.OpenOrCreate);
+                    ExisteIndice = true;
+
+                }
+                bw = new BinaryWriter(fs); //Se crea un BinaryWriter
+
+
+                if (TipoIndice == 2)//para índice secundarios
+                {
+
                     for (int i = 0; i < AtribSec.Count; i++)
                     {
                         Atributo a = AtribSec[i];
                         Debug.WriteLine(fs.Length);
-                        Ind.CreaSec(a.TD, bw, fs.Length, a.LD,a.NA);
+                        fs.Seek(fs.Length, SeekOrigin.Begin);
+                        Ind.CreaSec(a.TD, bw, fs.Length, a.LD, a.NA);
                     }
                     Debug.WriteLine(fs.Length);
                 }
-                else if (TipoIndice == 1)
+                else if (TipoIndice == 1)//para índice primario
                 {
+                    Ind = new Indice(TipoIndice);
                     if (t == 'E')
                         Ind.CreaIndice('E', bw, fs.Length);
                     else if (t == 'C')
@@ -409,12 +440,13 @@ namespace Archivos
 
         public void AbrirIdx()
         {
+            AtribSec.Clear();
             for (int i = 0; i < EntAux.LAtributo1.Count; i++)
             {
                 Atributo a = EntAux.LAtributo1[i];
                 if (a.TI == 2)//Si es índice primario 
                 {
-                    Ind = new Indice(1);
+                   // Ind = new Indice(1);
                     posPrim = i;
                     long AuxDir = EntAux.LAtributo1[posPrim].DI;
                     fs = new FileStream(NomArchIdx, FileMode.Open);
@@ -428,15 +460,25 @@ namespace Archivos
                     {
                         Ind.Abrir(a.TD, br);
                     }
-                    fs.Close();
                     MuestraPrimario();
-                    break;
+                    //break;
                 }
-                /* if (a.TI == 3) //Si es índice secundario
+                 if (a.TI == 3) //Si es índice secundario
                  {
-                     Ind = new Indice(2);
-                     PosSec = i;
-                 }*/
+                    AtribSec.Add(a);
+                    ExisteSec = true;
+                 }
+            }
+            fs.Close();
+            if (ExisteSec == true)
+            {
+                //Ind = new Indice(2);
+                foreach(Atributo a in AtribSec)
+                {
+                    Ind.AgregaSec(a.TD, a.DI, a.LD, a.NA);
+                }
+                LlenaCB();
+                ExisteSec = false;
             }
         }
 
@@ -647,7 +689,7 @@ namespace Archivos
         //Método que llena el combo box de los atributos que son índices secundarios
         public void LlenaCB()
         {
-            //Se limpia el combo box de las entidades 
+            //Se limpia el combo box de los atributos 
             CBAtribSec.Items.Clear();
             //Ciclo para agregar las entidades al combo box
             foreach (Atributo atrib in AtribSec)
@@ -676,7 +718,7 @@ namespace Archivos
                     b.Dir = fs.Length;
                     fs.Seek(sec.TamPrin1, SeekOrigin.Begin);
                     bw = new BinaryWriter(fs);
-                    sec.ActualizaPrincipal(bw);
+                    sec.ActualizaPrincipal(bw,tam);
 
                     //una vez actualizado se crea el sub-bloque de direcciones
                     fs.Seek(fs.Length, SeekOrigin.Begin);
@@ -780,6 +822,7 @@ namespace Archivos
             DGSubSec.Rows.Clear();
             int tam = LongDato(CBAtribSec.Text);
             ElemSec = Ind.Secundarios[PosSec];
+            Debug.WriteLine(ElemSec.NombreAtrib1);
             fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.ReadWrite);
             fs.Seek(ElemSec.TamPrin1, SeekOrigin.Begin);
             br = new BinaryReader(fs);

@@ -703,6 +703,16 @@ namespace Archivos
                         //Checa índice primario
                         if (a.TI == 2)
                             a.DI = reg.Ind1.TamPrinPrim1;
+                        if(a.TI == 3)
+                        {
+                            //asignar la dirección de bloque principal
+                            for(int j = 0; j < reg.Ind1.Secundarios.Count; j++)
+                            {
+                                Secundario s = reg.Ind1.Secundarios[j];
+                                if (a.NA == s.NombreAtrib1)
+                                    a.DI = s.TamPrin1;
+                            }
+                        }
                     }
                     //AgregaAtribDG();
                     //AgregaFila();

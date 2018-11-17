@@ -34,10 +34,17 @@ namespace Archivos
             }
         }
 
+        //Método que lee agrega secundarios a la lista de secundarios
+        public void AgregaSec(char t, long tam, int LD, string atributo)
+        { // t es el tipo de dato y atributo es el nombre del atributo
+            sec = new Secundario(t, atributo);
+            sec.TamPrin1 = tam;
+            secundarios.Add(sec);
+        }
+
         //Método para inicializar la instancia de secundario
         public void CreaSec(char t, BinaryWriter bw, long tam, int LD, string atributo)
         {
-
             sec = new Secundario(t,atributo);
             sec.TamPrin1 = tam;
             secundarios.Add(sec);
