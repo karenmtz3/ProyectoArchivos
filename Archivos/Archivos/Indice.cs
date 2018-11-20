@@ -26,12 +26,9 @@ namespace Archivos
         //Metodo para inicializar la instancia de primario
         public void CreaIndice(char t, BinaryWriter bw, long tam)
         {
-            if(TipoIndice == 1)
-            {
                 TamPrinPrim = tam;
                 prim = new Primario(t);
                 prim.CreaBloquePrincipal(bw);
-            }
         }
 
         //Método que lee agrega secundarios a la lista de secundarios
