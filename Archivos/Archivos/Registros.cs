@@ -29,25 +29,24 @@ namespace Archivos
         DataGridViewTextBoxColumn inicio;
         DataGridViewTextBoxColumn fin;
 
-        OpenFileDialog abrir;
+        //Variable para importación
+        OpenFileDialog AbrirImp;
+        //Variables para leer y escribir en los archivos 
         private FileStream fs;
         private BinaryWriter bw;
         private BinaryReader br;
 
         private int cb;
-        bool P, S;
-
-        //índices secundarios
+        
+        //Variables para índice primario y secundario
         List<Atributo> AtribSec;
         Secundario ElemSec;
         int PosSec;
         bool ExisteSec;
-
         bool ExisteIndice;
-
         private int posPrim;
-
         Indice Ind;
+        bool P, S;
 
         public Entidad EntAux1 { get => EntAux; set => EntAux = value; }
         internal List<Registro> LRegistros1 { get => LRegistros; set => LRegistros = value; }
@@ -59,7 +58,7 @@ namespace Archivos
             LRegistros = new List<Registro>();
             inicio = new DataGridViewTextBoxColumn();
             fin = new DataGridViewTextBoxColumn();
-            abrir = new OpenFileDialog();
+            AbrirImp = new OpenFileDialog();
 
             ExisteIndice = ExisteSec = false;
             AbrirArch = false;
@@ -162,7 +161,7 @@ namespace Archivos
             }
             fs.Close();
             ImprimeDataGrid();
-            ImprimeLista();
+            //ImprimeLista();
         }
 
         public bool ClaveBusqueda()
@@ -399,7 +398,7 @@ namespace Archivos
 
         }
 
-
+        //Evento para seleccionar el registro que se va a modificar o eliminar
         private void DGRegistros_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             pos = e.RowIndex;
@@ -409,6 +408,65 @@ namespace Archivos
                 aux = DGRegistros.Rows[pos].Cells[i + 1].Value.ToString();
                 //Debug.WriteLine(aux);
                 DGCaptura.Rows[0].Cells[i].Value = aux;
+            }
+
+        }
+        
+        //Evento para importar un archivo CSV
+        private void importarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                CreaColumnas(); //también crea archivo de datos y archivo de índices
+
+                AbrirImp.Filter = "CSV files(*.csv)|*.CSV";
+                AbrirImp.Title = "Selecciona el archivo a importar";
+                if(AbrirImp.ShowDialog() == DialogResult.OK)
+                {
+                    FileStream fimp = File.Open(NomArch, FileMode.Open, FileAccess.ReadWrite);
+                    string[] lineas = File.ReadAllLines(AbrirImp.FileName); //arreglo de las líneas que contiene el archivo
+                    for(int j = 0; j < 200; j++)//foreach(var l in lineas) //ciclo para recorrer cada una de las líneas
+                    {
+                        var l = lineas[j];
+                        if (j == 109)
+                            Debug.WriteLine("Holi");
+                        int n = DGRegistros.Rows.Add();
+                        TamArch = fimp.Length;
+                        bw = new BinaryWriter(fimp);
+                        reg = new Registro(TamArch, -1);
+                        DGRegistros.Rows[n].Cells[0].Value = reg.DR;
+                        DGRegistros.Rows[n].Cells[DGRegistros.ColumnCount - 1].Value = reg.DSR;
+                        var valores = l.Split(','); //Se separa por comas y se almacena en un arreglo
+                        for(int i = 0; i < DGCaptura.ColumnCount; i++)
+                        {
+                            DGRegistros.Rows[n].Cells[i + 1].Value = valores[i];
+                            reg.Elementos.Add(valores[i]);
+                            //Debug.WriteLine(valores[i]);
+                        }
+                        LRegistros.Add(reg);
+                        reg.Escribe(bw, EntAux);
+                        //índice primario o secundario
+                        for (int i = 0; i < DGCaptura.ColumnCount; i++)
+                        {
+                            Atributo a = EntAux.LAtributo1[i];
+                            if (a.TI == 2) //Si es índice primario crea el bloque principal
+                                SubPrimario();
+                            else if (a.TI == 3) //Si hay índices secudarios, agrega el valor al bloque principal y la dirección al sub-bloque
+                            {
+                                string v = reg.Elementos[i];//(string)DGCaptura.Rows[0].Cells[i].Value;
+                                AgregaPrinSec(a.NA, v, a.LD);
+                            }
+                        }
+                        //fimp.Close();
+                    }
+                    fimp.Close();
+                    Actualizar();
+                    LlenaCB();
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
             }
 
         }
@@ -451,6 +509,7 @@ namespace Archivos
             }
         }
 
+        //Método para abrir el archivo de índices 
         public void AbrirIdx()
         {
             AtribSec.Clear();
@@ -587,10 +646,12 @@ namespace Archivos
         public void SubPrimario()
         {
             fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.Write);
-            string auxR = reg.Elementos[posPrim];
-            char[] R = auxR.ToCharArray();
+           
             if (Ind.Prim.TipoDato1 == 'E')
             {
+                int aux = Convert.ToInt32(reg.Elementos[pos]);
+                string aux2 = aux.ToString();
+                char[] R = aux2.ToCharArray();
                 for (int i = 0; i < Ind.Prim.BPrincipal1.Count; i++)
                 {
                     BloquePrincipal b = Ind.Prim.BPrincipal1[i];
@@ -615,12 +676,19 @@ namespace Archivos
                             i = Ind.Prim.BPrincipal1.Count;
                         }
                         else
+                        {
                             AgregaElemASubPrim(i);
+                            fs.Close();
+                            i = Ind.Prim.BPrincipal1.Count;
+                        }
+
                     }
                 }
             }
             else if (Ind.Prim.TipoDato1 == 'C')
             {
+                string auxR = reg.Elementos[posPrim];
+                char[] R = auxR.ToCharArray();
                 for (int i = 0; i < Ind.Prim.BPrincipal1.Count; i++)
                 {
                     BloquePrincipal b = Ind.Prim.BPrincipal1[i];
@@ -645,10 +713,15 @@ namespace Archivos
                             i = Ind.Prim.BPrincipal1.Count;
                         }
                         else
+                        {
                             AgregaElemASubPrim(i);
+                            fs.Close();
+                            i = Ind.Prim.BPrincipal1.Count;
+                        }
                     }
                 }
             }
+            fs.Close();
             MuestraPrimario();
             MuestraSubPrim();
 
@@ -773,7 +846,6 @@ namespace Archivos
             fs.Close();
         }
 
-
         //Método que llena el combo box de los atributos que son índices secundarios
         public void LlenaCB()
         {
@@ -784,10 +856,25 @@ namespace Archivos
                 CBAtribSec.Items.Add(atrib.NA);
         }
 
-
+        public string Rellena(string valor, int tam)
+        {
+            string aux = "";
+            char[] rellena = valor.ToCharArray();
+            for(int i = 0; i < tam; i++)
+            {
+                if (i < rellena.Length)
+                    aux += rellena[i];
+                else
+                    aux += " ";
+            }
+            return aux;
+        }
         //Método para agregar elementos al bloque principal 
         public void AgregaPrinSec(string NA, string valor, int tam)
         {
+            //Se rellena con espacios 
+            string valorR = Rellena(valor, tam);
+
             fs = File.Open(NomArchIdx, FileMode.Open, FileAccess.ReadWrite);
             br = new BinaryReader(fs);
             int PS = Ind.EncuentraSec(NA);
@@ -798,8 +885,11 @@ namespace Archivos
             {
                 BloquePrincipal b = sec.Principal1[i];
                 Debug.WriteLine(b.Valor);
-                string aux2 = int.MaxValue.ToString();
-                if (b.Valor == "" || b.Valor == aux2) // si lo que esta en el bloque es vacío se agrega el elemento
+                string aux = "";
+                for (int j = 0; j < tam; j++)
+                    aux += " ";
+                string aux2 = int.MaxValue.ToString();            
+                if (b.Valor == aux || b.Valor == aux2) // si lo que esta en el bloque es vacío se agrega el elemento
                 {
                     //Se asignan los nuevos valores y se actualiza el bloque principal
                     b.Valor = valor;
@@ -815,7 +905,7 @@ namespace Archivos
                     fs.Close();
                     i = sec.Principal1.Count;
                 }
-                else if (b.Valor == valor) //Si se encuentra el elemento en el bloque principal se agrega la dirección al sub-bloque
+                else if (b.Valor == valorR) //Si se encuentra el elemento en el bloque principal se agrega la dirección al sub-bloque
                 {
                     long P = sec.Principal1[i].Dir;
                     AgregaDirSec(sec, P, reg.DR);
@@ -823,7 +913,7 @@ namespace Archivos
                     fs.Close();
                 }
             }
-            //fs.Close();
+            fs.Close();
         }
 
         //Método que agrega direcciónes al sub-bloque
@@ -883,13 +973,6 @@ namespace Archivos
                 }
             }
         }
-        #endregion
-
-        private void cargarToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            CreaColumnas();
-            LlenaCB();
-        }
 
         public int LongDato(string CBSec)
         {
@@ -919,6 +1002,9 @@ namespace Archivos
             fs.Close();
             MuestraPrinSec();
         }
+
+      
+
         private void DGSecundario_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             long aux = Convert.ToInt64(DGSecundario[1, e.RowIndex].Value);
@@ -937,7 +1023,13 @@ namespace Archivos
             else
                 MessageBox.Show("No existe sub bloque");
         }
-
+        #endregion
+        //Evento para crear el archivo de datos y el de índices si existe
+        private void cargarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CreaColumnas();
+            LlenaCB();
+        }
     }
     #endregion
 }

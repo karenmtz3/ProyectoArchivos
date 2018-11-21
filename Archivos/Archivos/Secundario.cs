@@ -32,7 +32,7 @@ namespace Archivos
             if(TDato == 'E')
             {
                 int n = int.MaxValue;
-                for (int i = 0; i < 50; i++)
+                for (int i = 0; i < 100; i++)
                 {
                     string valor = n.ToString();
                     BloquePrincipal b = new BloquePrincipal(valor);
@@ -43,7 +43,7 @@ namespace Archivos
             }
             if(TDato == 'C')
             {
-                for(int i = 0; i < 50; i++)
+                for(int i = 0; i < 100; i++)
                 {
                     tam = t;
                     string valor = "";
@@ -83,7 +83,7 @@ namespace Archivos
         public void LlenaSub(BinaryReader br)
         {
             SubB.Clear();
-            for(int i = 0; i < 50; i++)
+            for(int i = 0; i < 100; i++)
             {
                 long dir = br.ReadInt64();
                 SubB.Add(dir);
@@ -96,7 +96,7 @@ namespace Archivos
         public void LeeSub(BinaryReader br)
         {
             SubB.Clear();
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 100; i++)
             {
                 long dir = br.ReadInt64();
                 SubB.Add(dir);
@@ -149,7 +149,7 @@ namespace Archivos
         public void CreaSubBloque(long DR, BinaryWriter bw)
         {
             SubB.Clear();
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 100; i++)
             {
                 if (i == 0)
                 {
@@ -171,7 +171,7 @@ namespace Archivos
             Principal.Clear();
             if(TDato == 'E')
             {
-                for(int i = 0; i < 50; i++)
+                for(int i = 0; i < 100; i++)
                 {
                     int valor = br.ReadInt32();
                     long dir = br.ReadInt64();
@@ -182,13 +182,13 @@ namespace Archivos
             }
             else if(TDato == 'C')
             {
-                for(int i = 0; i < 50; i++)
+                for(int i = 0; i < 100; i++)
                 {
                     string aux = "";
                     char[] aux2 = br.ReadChars(t);
                     foreach (char n in aux2)
                     {
-                        if (char.IsLetter(n))
+                        //if (char.IsLetter(n))
                             aux += n;
                     }
                     long d = br.ReadInt64();

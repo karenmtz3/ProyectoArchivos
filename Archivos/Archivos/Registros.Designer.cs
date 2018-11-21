@@ -99,6 +99,7 @@
             this.importarToolStripMenuItem.Name = "importarToolStripMenuItem";
             this.importarToolStripMenuItem.Size = new System.Drawing.Size(65, 20);
             this.importarToolStripMenuItem.Text = "Importar";
+            this.importarToolStripMenuItem.Click += new System.EventHandler(this.importarToolStripMenuItem_Click);
             // 
             // Registro
             // 
