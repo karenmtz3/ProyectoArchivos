@@ -227,7 +227,8 @@
             "0",
             "1",
             "2",
-            "3"});
+            "3",
+            "4"});
             this.CBIndice.Location = new System.Drawing.Point(354, 14);
             this.CBIndice.Name = "CBIndice";
             this.CBIndice.Size = new System.Drawing.Size(35, 21);

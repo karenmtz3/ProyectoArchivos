@@ -263,6 +263,10 @@ namespace Archivos
                             if (CBIndice.SelectedIndex == 2)
                                 CBIndice.Text = "0";
                             break;
+                        case 4:
+                            if (CBIndice.SelectedIndex == 4)
+                                CBIndice.Text = "0";
+                            break;
                     }
             }
         }
