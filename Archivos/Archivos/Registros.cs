@@ -37,7 +37,7 @@ namespace Archivos
         private BinaryReader br;
 
         private int cb;
-        
+
         //Variables para índice primario y secundario
         List<Atributo> AtribSec;
         Secundario ElemSec;
@@ -50,10 +50,13 @@ namespace Archivos
 
         Arbol tree;
         int PosArbol;
+        long cabAr;
+        Nodo AInterm = null;
 
         public Entidad EntAux1 { get => EntAux; set => EntAux = value; }
         internal List<Registro> LRegistros1 { get => LRegistros; set => LRegistros = value; }
         internal Indice Ind1 { get => Ind; set => Ind = value; }
+        public long CabAr { get => cabAr; set => cabAr = value; }
 
         public Registros()
         {
@@ -70,8 +73,10 @@ namespace Archivos
 
             P = S = false;
 
-            PosArbol = - 1;
+            PosArbol = -1;
             posPrim = -1;
+            cabAr = -1;
+
 
         }
         #region Registros
@@ -120,13 +125,13 @@ namespace Archivos
                         ExisteSec = true;
                     }
                 }
-                else if(atrib.TI == 4) //Si es árbol
+                else if (atrib.TI == 4) //Si es árbol
                 {
                     CreaArchIndice(atrib.TD, atrib.TI);
                     PosArbol = i;
                 }
             }
-            if(AbrirArch == false)
+            if (AbrirArch == false)
                 if (AtribSec.Count > 0 && ExisteSec == true)
                     CreaSecundario();
         }
@@ -169,7 +174,6 @@ namespace Archivos
             }
             fs.Close();
             ImprimeDataGrid();
-            //ImprimeLista();
         }
 
         public bool ClaveBusqueda()
@@ -205,11 +209,11 @@ namespace Archivos
                 LRegistros[LRegistros.Count - 1].DSR = -1;
             }
 
-            for (int i = 0; i < LRegistros.Count; i++)
+           /* for (int i = 0; i < LRegistros.Count; i++)
             {
                 DGRegistros.Rows[i].Cells[0].Value = LRegistros[i].DR;
                 DGRegistros.Rows[i].Cells[DGRegistros.ColumnCount - 1].Value = LRegistros[i].DSR;
-            }
+            }*/
         }
 
         //Crea el archivo en donde se guardarán los registros de la entidad seleccionada
@@ -263,10 +267,11 @@ namespace Archivos
                     string v = (string)DGCaptura.Rows[0].Cells[i].Value;
                     AgregaPrinSec(a.NA, v, a.LD);
                 }
-                else if(a.TI == 4) //si hay un arbol, agrega el apuntador el la cb al nodo
+                else if (a.TI == 4) //si hay un arbol, agrega el apuntador el la cb al nodo
                 {
                     string v = (string)DGCaptura.Rows[0].Cells[i].Value;
-                    Inserta(v,reg.DR);
+                    Inserta(Convert.ToInt32(v), reg.DR);
+                    //cabAr = tree.CabArbol();
                 }
             }
             DGCaptura.Rows.Clear();
@@ -367,9 +372,9 @@ namespace Archivos
                     SubPrimario();
                 }
             }
-            
 
-            if(S == true)
+
+            if (S == true)
             {
                 for (int i = 0; i < EntAux.LAtributo1.Count; i++) //Se recorre la lista de atributos que son secundarios
                 {
@@ -393,13 +398,13 @@ namespace Archivos
                 Debug.WriteLine(elimPrim);
                 BuscaEnPrincipal(elimPrim);
             }
-            if(S == true) //Si existen índices secundarios
+            if (S == true) //Si existen índices secundarios
             {
-                for(int i = 0; i < EntAux.LAtributo1.Count; i++) //Se recorre la lista de atributos que son secundarios
+                for (int i = 0; i < EntAux.LAtributo1.Count; i++) //Se recorre la lista de atributos que son secundarios
                 {
                     Atributo a = EntAux.LAtributo1[i];
-                    if(a.TI == 3)
-                        BuscaEnSecundario(a.NA,reg.DR, a.LD,reg.Elementos[i]);
+                    if (a.TI == 3)
+                        BuscaEnSecundario(a.NA, reg.DR, a.LD, reg.Elementos[i]);
                 }
             }
             for (int i = 0; i < LRegistros.Count; i++)
@@ -426,7 +431,7 @@ namespace Archivos
             }
 
         }
-        
+
         //Evento para importar un archivo CSV
         private void importarToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -434,34 +439,29 @@ namespace Archivos
             {
                 CreaColumnas(); //también crea archivo de datos y archivo de índices
 
+                bool Arbol = false;
+
                 AbrirImp.Filter = "CSV files(*.csv)|*.CSV";
                 AbrirImp.Title = "Selecciona el archivo a importar";
-                if(AbrirImp.ShowDialog() == DialogResult.OK)
+                if (AbrirImp.ShowDialog() == DialogResult.OK)
                 {
-                    FileStream fimp = File.Open(NomArch, FileMode.Open, FileAccess.ReadWrite);
-                    string[] lineas = File.ReadAllLines(AbrirImp.FileName); //arreglo de las líneas que contiene el archivo
-                    for(int j = 0; j < 200; j++)//foreach(var l in lineas) //ciclo para recorrer cada una de las líneas
+
+                    StreamReader sr = new StreamReader(AbrirImp.FileName);
+                    while (!sr.EndOfStream)
                     {
-                        var l = lineas[j];
-                        if (j == 109)
-                            Debug.WriteLine("Holi");
-                        int n = DGRegistros.Rows.Add();
+                        string[] linea = sr.ReadLine().Split(',');
+                        FileStream fimp = File.Open(NomArch, FileMode.Open, FileAccess.ReadWrite);
                         TamArch = fimp.Length;
+                        fimp.Seek(TamArch, SeekOrigin.Begin);
                         bw = new BinaryWriter(fimp);
                         reg = new Registro(TamArch, -1);
-                        DGRegistros.Rows[n].Cells[0].Value = reg.DR;
-                        DGRegistros.Rows[n].Cells[DGRegistros.ColumnCount - 1].Value = reg.DSR;
-                        var valores = l.Split(','); //Se separa por comas y se almacena en un arreglo
-                        for(int i = 0; i < DGCaptura.ColumnCount; i++)
-                        {
-                            DGRegistros.Rows[n].Cells[i + 1].Value = valores[i];
-                            reg.Elementos.Add(valores[i]);
-                            //Debug.WriteLine(valores[i]);
-                        }
+                        for (int i = 0; i < linea.Length; i++)
+                            reg.Elementos.Add(linea[i]);
                         LRegistros.Add(reg);
                         reg.Escribe(bw, EntAux);
-                        //índice primario o secundario
-                        for (int i = 0; i < DGCaptura.ColumnCount; i++)
+
+                        //índice primario, secundario o árbol
+                        for (int i = 0; i < linea.Length; i++)
                         {
                             Atributo a = EntAux.LAtributo1[i];
                             if (a.TI == 2) //Si es índice primario crea el bloque principal
@@ -471,15 +471,72 @@ namespace Archivos
                                 string v = reg.Elementos[i];//(string)DGCaptura.Rows[0].Cells[i].Value;
                                 AgregaPrinSec(a.NA, v, a.LD);
                             }
+                            else if (a.TI == 4) //Si es árbol
+                            {
+                                Arbol = true;
+                                 Inserta(Convert.ToInt32(reg.Elementos[PosArbol]), reg.DR);
+                            }
+                        }
+                        fimp.Close();
+                    }
+                    /*string[] lineas = File.ReadAllLines(AbrirImp.FileName); //arreglo de las líneas que contiene el archivo
+                    for(int j = 0; j < lineas.Length; j++)//foreach(var l in lineas) //ciclo para recorrer cada una de las líneas
+                    {
+                        
+                        var l = lineas[j];
+                        if (l != "")
+                        {
+                            //if (j == 109)
+                            // Debug.WriteLine("Holi");
+                            int n = DGRegistros.Rows.Add();
+                            TamArch = fimp.Length;
+                            bw = new BinaryWriter(fimp);
+                            reg = new Registro(TamArch, -1);
+                            DGRegistros.Rows[n].Cells[0].Value = reg.DR;
+                            DGRegistros.Rows[n].Cells[DGRegistros.ColumnCount - 1].Value = reg.DSR;
+                            var valores = l.Split(','); //Se separa por comas y se almacena en un arreglo
+                            for (int i = 0; i < DGCaptura.ColumnCount; i++)
+                            {
+                                DGRegistros.Rows[n].Cells[i + 1].Value = valores[i];
+                                reg.Elementos.Add(valores[i]);
+                                //Debug.WriteLine(valores[i]);
+                            }
+                            LRegistros.Add(reg);
+                            reg.Escribe(bw, EntAux);
+                            //índice primario o secundario
+                            for (int i = 0; i < DGCaptura.ColumnCount; i++)
+                            {
+                                Atributo a = EntAux.LAtributo1[i];
+                                if (a.TI == 2) //Si es índice primario crea el bloque principal
+                                    SubPrimario();
+                                else if (a.TI == 3) //Si hay índices secudarios, agrega el valor al bloque principal y la dirección al sub-bloque
+                                {
+                                    string v = reg.Elementos[i];//(string)DGCaptura.Rows[0].Cells[i].Value;
+                                    AgregaPrinSec(a.NA, v, a.LD);
+                                }
+                                else if (a.TI == 4)
+                                {
+                                    Inserta(Convert.ToInt32(reg.Elementos[PosArbol]), reg.DR);
+                                    //Inserta(reg.Elementos[PosArbol], reg.DR);
+                                    cabAr = tree.CabArbol();
+                                    if(tree.LNodos1.Count == 29)
+                                    {
+
+                                    }
+                                }
+                            }
                         }
                         //fimp.Close();
                     }
-                    fimp.Close();
+                    MuestraArbol();*/
+                    if (Arbol)
+                        MuestraArbol();
+
                     Actualizar();
                     LlenaCB();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
             }
@@ -498,6 +555,8 @@ namespace Archivos
                 if (ExisteIndice == false) //bandera para inicializar la instancia de indice
                 {
                     Ind = new Indice(1);
+                    if (TI == 4)
+                        tree = new Arbol();
                     ExisteIndice = true;
                     AbrirIdx();
                 }
@@ -563,6 +622,28 @@ namespace Archivos
                     AtribSec.Add(a);
                     ExisteSec = true;
                 }
+                if (a.TI == 4)//Si es árbol
+                {
+                    long AuxD = EntAux.LAtributo1[i].DI;
+                    fs = new FileStream(NomArchIdx, FileMode.Open);
+                    fs.Seek(AuxD, SeekOrigin.Begin);
+                    br = new BinaryReader(fs);
+                    tree.LeeArbol(br);
+                    Nodo auxR = tree.LNodos1[0];//Se selecciona la raíz 
+                    cabAr = auxR.DirNodo1;
+                    //Ciclo para leer los hijos y agregarlos a la lista de nodos
+                    for (int j = 0; j < auxR.Direcciones1.Count; j++)
+                    {
+                        long DAux = auxR.Direcciones1[j];
+                        if (DAux != -1)
+                        {
+                            fs.Seek(DAux, SeekOrigin.Begin);
+                            br = new BinaryReader(fs);
+                            tree.LeeHijos(br);
+                        }
+                    }
+                    MuestraArbol();
+                }
             }
             fs.Close();
             if (ExisteSec == true)
@@ -576,7 +657,6 @@ namespace Archivos
                 ExisteSec = false;
             }
         }
-
 
         #region IndicePrimario
         //Método que muestra el bloque principal del índice primario
@@ -669,7 +749,7 @@ namespace Archivos
         public void SubPrimario()
         {
             fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.Write);
-           
+
             if (Ind.Prim.TipoDato1 == 'E')
             {
                 int aux = Convert.ToInt32(reg.Elementos[pos]);
@@ -843,18 +923,18 @@ namespace Archivos
             s.LeePricipal(br, tam);
 
             //Ciclo para buscar el valor a eliminar
-            for(int i = 0; i < s.Principal1.Count; i++)
+            for (int i = 0; i < s.Principal1.Count; i++)
             {
                 BloquePrincipal b = s.Principal1[i];
-                if(b.Valor == Eliminar)
+                if (b.Valor == Eliminar)
                 {
                     fs.Seek(b.Dir, SeekOrigin.Begin);
                     br = new BinaryReader(fs);
                     s.LeeSub(br);
                     //ciclo para buscar la dirección del elemento a eliminar
-                    for(int j = 0; j < s.SubB1.Count; j++)
+                    for (int j = 0; j < s.SubB1.Count; j++)
                     {
-                        if(s.SubB1[j] == DR)
+                        if (s.SubB1[j] == DR)
                         {
                             s.SubB1[j] = -1;
                             j = s.SubB1.Count;
@@ -883,7 +963,7 @@ namespace Archivos
         {
             string aux = "";
             char[] rellena = valor.ToCharArray();
-            for(int i = 0; i < tam; i++)
+            for (int i = 0; i < tam; i++)
             {
                 if (i < rellena.Length)
                     aux += rellena[i];
@@ -897,7 +977,9 @@ namespace Archivos
         {
             //Se rellena con espacios 
             string valorR = Rellena(valor, tam);
-
+            string aux = "";
+            for (int j = 0; j < tam; j++)
+                aux += " ";
             fs = File.Open(NomArchIdx, FileMode.Open, FileAccess.ReadWrite);
             br = new BinaryReader(fs);
             int PS = Ind.EncuentraSec(NA);
@@ -908,10 +990,8 @@ namespace Archivos
             {
                 BloquePrincipal b = sec.Principal1[i];
                 Debug.WriteLine(b.Valor);
-                string aux = "";
-                for (int j = 0; j < tam; j++)
-                    aux += " ";
-                string aux2 = int.MaxValue.ToString();            
+               
+                string aux2 = int.MaxValue.ToString();
                 if (b.Valor == aux || b.Valor == aux2) // si lo que esta en el bloque es vacío se agrega el elemento
                 {
                     //Se asignan los nuevos valores y se actualiza el bloque principal
@@ -971,8 +1051,9 @@ namespace Archivos
         {
             DGSecundario.Rows.Clear();
             ElemSec.Principal1 = ElemSec.Principal1.OrderBy(o => o.Valor).ToList();
-            foreach (BloquePrincipal b in ElemSec.Principal1)
+            for (int i = 1; i < ElemSec.Principal1.Count+1; i++)
             {
+                BloquePrincipal b = ElemSec.Principal1[i-1];
                 if (b.Dir != -1)
                 {
                     int n = DGSecundario.Rows.Add();
@@ -1026,7 +1107,7 @@ namespace Archivos
             MuestraPrinSec();
         }
 
-      
+
 
         private void DGSecundario_CellClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -1048,258 +1129,490 @@ namespace Archivos
         }
         #endregion
 
-
         #region Arbol
-        public void Inserta(string v, long DR)
+        public void Inserta(int valor, long dr)
         {
             fs = new FileStream(NomArchIdx, FileMode.Open, FileAccess.Write);
-            bw = new BinaryWriter(fs);
-            int valor = Convert.ToInt32(v);
-
-            int total = tree.LNodos1.Count;
-            if (total == 1)
+            if (tree.H1.Count == 1)
             {
-                Nodo n = tree.LNodos1[0];
-                for (int i = 0; i < 4; i++)
+                Nodo AuxH = tree.H1[0];
+                for (int i = 0; i < AuxH.Claves1.Count; i++)
                 {
-                    if (n.Claves1[i] == int.MaxValue)
+                    if (AuxH.Claves1[i] == int.MaxValue)
                     {
-                        InsertaEnHoja(n, valor,DR,i);
-                        //Después de inserta un nuevo valor se actualiza en el archivo
-                        fs.Seek(n.DirNodo1, SeekOrigin.Begin);
-                        n.EscribeNodo(bw);
-                        i = 4;
+                        AuxH.Claves1[i] = valor;
+                        i = AuxH.Claves1.Count;
                     }
-                    else if (n.Claves1[i] != int.MaxValue && i == 3)
+                    else if (i == 3 && AuxH.Claves1[i] != int.MaxValue)
                     {
-                        /*tree.CreaNodo(fs.Length, 'H', -1, int.MaxValue, -1, bw);*/
-                        Nodo NuevoNodo = new Nodo(fs.Length, 'H');
-                        NuevoNodo.InicializaListas();
-
-                        //Se crea un nodo auxiliar
-                        Nodo auxN = new Nodo(fs.Length, 'H');
-                        auxN.InicializaListas();
-                        //Se copia los valores del nodo 'n' a auxN desde la posición 1
-                        for (int j = 0; j < n.Claves1.Count - 1; j++)
-                        {
-                            auxN.Direcciones1[j] = n.Direcciones1[j + 1];
-                            auxN.Claves1[j] = n.Claves1[j + 1];
-                        }
-                        //Se inserta el nuevo valor en el nodo copia
-                        for (int j = 0; j < 4; j++)
-                            if (auxN.Claves1[j] == int.MaxValue)
-                                InsertaEnHoja(auxN, valor, DR, j);
-                        //Se borran los valores a partir de la posición 1 del nodo seleccionado
-                         BorrarValores(n);
-                        //Se copia del nodo auxiliar el primero valor al nodo seleccionado 
-                        n.Claves1[1] = auxN.Claves1[0];
-                        n.Direcciones1[1] = auxN.Direcciones1[0];
-                        //Se pasa los valores del nodo auxiliar al nuevo nodo
-                        CopiaValores(NuevoNodo, auxN);
-
-                        fs.Seek(fs.Length, SeekOrigin.Begin);
-                        tree.LNodos1.Add(NuevoNodo);
-                        NuevoNodo.EscribeNodo(bw);
-                        n.TipoNodo1 = 'R';
-                        int menor = NuevoNodo.Claves1[0];
-                        fs.Seek(fs.Length, SeekOrigin.Begin);
-                        InsertaEnPadre(n, menor, NuevoNodo);
-                        //i = tree.LNodos1.Count;
+                        AuxH.Claves1.Add(valor);
                     }
-
+                }
+                for (int i = 0; i < AuxH.Direcciones1.Count; i++)
+                {
+                    if (AuxH.Direcciones1[i] == -1)
+                    {
+                        AuxH.Direcciones1[i] = dr;
+                        i = AuxH.Direcciones1.Count;
+                    }
+                }
+                OrdenaValores(tree.H1[0]);
+                //Cuando se desborda una hoja
+                if (tree.H1[0].Claves1.Count == 5)
+                {
+                    CreaHoja(tree.H1[0]);
+                    BorraValores(tree.H1[0]);
+                    OrdenaValores(tree.H1[1]);
+                    CreaRaiz(tree.H1[0].DirNodo1, tree.H1[1].Claves1[0], tree.H1[1].DirNodo1);
                 }
             }
-
             else
             {
-                long Auxdir = BuscaRaiz(tree.LNodos1, valor);
-
-                //Ciclo para buscar el nodo hoja en donde se insertará el valor 
-                for(int i = 0; i < tree.LNodos1.Count; i++)
+                if (tree.I1.Count == 0)
                 {
-                    Nodo aux = tree.LNodos1[i];
-                    if (aux.TipoNodo1 != 'H')
+                    long DirH = BuscaDHoja(valor, tree.Raiz1);
+                    Nodo Aux = BuscaNodo(DirH);
+                    BuscaHoja(DirH, ref Aux);
+                    Agregar(Aux, valor, dr);
+                }
+                else
+                {
+                    long AuxI = BuscaDHoja(valor, tree.Raiz1);
+                    //AInterm = BuscaNodo(AuxI);
+                    BuscaIn(AuxI, ref AInterm);
+                    bool Level = BuscaLevel(AInterm);
+                    while (Level)
                     {
-                        for (int j = 0; j < aux.Direcciones1.Count; j++)
-                        {
-                            if (aux.Direcciones1[j] == Auxdir)
-                            {
-                                for (int k = 0; k < aux.Claves1.Count; k++)
-                                {
-                                    if (aux.Claves1[k] == int.MaxValue)
-                                    {
-                                        InsertaEnHoja(aux, valor, DR, k);
-                                        //Después de inserta un nuevo valor se actualiza en el archivo
-                                        fs.Seek(aux.DirNodo1, SeekOrigin.Begin);
-                                        aux.EscribeNodo(bw);
-                                        k = 4;
-                                    }
-                                }
-                                j = aux.Direcciones1.Count;
-                            }
-                        }
+                        AuxI = BuscaDHoja(valor, AInterm);
+                        BuscaIn(AuxI, ref AInterm);
+                        Level = BuscaLevel(AInterm);
                     }
+                    long DirH = BuscaDHoja(valor, AInterm);
+                    Nodo Aux = BuscaNodo(DirH);
+                    if(DirH == -1)
+                    {
+
+                    }
+                    BuscaHoja(DirH, ref Aux);
+                    if(Aux == null)
+                    {
+
+                    }
+                    Agregar(Aux, valor, dr);
                 }
             }
             fs.Close();
         }
 
-        public long BuscaRaiz(List<Nodo> Nodos, int valor)
+        public bool BuscaLevel(Nodo n)
+        {
+            bool aux = false;
+            foreach (Nodo nodo in tree.I1)
+            {
+                if (nodo.Direcciones1[0] == n.DirNodo1)
+                {
+                    aux = true;
+                    break;
+                }
+            }
+            return aux;
+        }
+
+        //Método para agregar valores
+        public void Agregar(Nodo n, int valor, long DR)
+        {
+            if (n.TipoNodo1 == 'H')
+            {
+
+                for (int i = 0; i < n.Claves1.Count; i++)
+                {
+                    if (n.Claves1[i] == int.MaxValue)
+                    {
+                        n.Claves1[i] = valor;
+                        i = n.Claves1.Count;
+                    }
+                    else if (i == 3 && n.Claves1[i] != int.MaxValue)
+                    {
+                        n.Claves1.Add(valor);
+                    }
+                }
+                for (int i = 0; i < n.Direcciones1.Count; i++)
+                {
+                    if (n.Direcciones1[i] == -1)
+                    {
+                        n.Direcciones1[i] = DR;
+                        i = n.Direcciones1.Count;
+                    }
+                }
+                OrdenaValores(n);
+                if (n.Claves1.Count == 5)
+                {
+                    Nodo HNueva;
+                    CreaHoja(n);
+                    HNueva = tree.H1[tree.H1.Count - 1];
+                    BorraValores(n);
+                    OrdenaValores(HNueva);
+
+                    if (tree.I1.Count == 0)
+                        Agregar(tree.Raiz1, HNueva.Claves1[0], HNueva.DirNodo1);
+                    else
+                        Agregar(AInterm, HNueva.Claves1[0], HNueva.DirNodo1);
+                }
+            }
+            else if (n.TipoNodo1 == 'R')
+            {
+                InsertaARI(n, valor, DR);
+                OrdenaValores(n);
+                
+                if (n.Claves1.Count == 5)
+                {
+                    n.TipoNodo1 = 'I';
+                    tree.I1.Add(n);
+                    int v = 0;
+                    CreaIntermedio(n);
+                    Nodo a = tree.I1[tree.I1.Count - 1];
+                    v = n.Claves1[2];
+                    BorraValores(n);
+                    OrdenaValores(a);
+                    CreaRaiz(n.DirNodo1, v, a.DirNodo1);
+                }
+            }
+            else if (n.TipoNodo1 == 'I')
+            {
+                InsertaARI(n, valor, DR);
+                OrdenaValores(n);
+                long dirAux = -1;
+                if (n.Claves1.Count == 5)
+                {
+                    int v = 0;
+                    CreaIntermedio(n);
+                    Nodo a = tree.I1[tree.I1.Count - 1];
+                    v = n.Claves1[2];
+                    BorraValores(n);
+                    OrdenaValores(a);
+                    bool Subir = ExisteNiveles(n.DirNodo1, ref dirAux);
+                    if (Subir)
+                    {
+                        Nodo Nodo = BuscaNodo(dirAux);
+                        Agregar(Nodo, v, Nodo.DirNodo1);
+                    }
+                    else
+                        Agregar(tree.Raiz1, v, a.DirNodo1);
+                }
+            }
+        }
+        public void BuscaHoja(long d, ref Nodo H)
+        {
+            foreach (Nodo N in tree.H1)
+            {
+                if (N.DirNodo1 == d)
+                {
+                    H = N;
+                    break;
+                }
+            }
+        }
+        public void AgregaAInterm(Nodo n, int menor, long dir)
+        {
+
+
+        }
+
+        //Método para saber si hay más intermedios
+        public bool ExisteNiveles(long dir, ref long dirA)
+        {
+            bool Existe = false;
+            foreach (Nodo n in tree.I1)
+            {
+                for (int i = 0; i < n.Direcciones1.Count; i++)
+                {
+                    if (n.Direcciones1[i] == dir)
+                    {
+                        Existe = true;
+                        dirA = n.DirNodo1;
+                        break;
+                    }
+                }
+            }
+            return Existe;
+        }
+        public void BuscaIn(long Dir, ref Nodo I)
+        {
+            foreach (Nodo n in tree.I1)
+            {
+                if (n.DirNodo1 == Dir)
+                {
+                    I = n;
+                    break;
+                }
+            }
+        }
+        //Método para agregar valor a la raíz
+        public void AgregaARaiz(int menor, long dir)
+        {
+
+        }
+
+        //Método para crear un nodo intermedio
+        public void CreaIntermedio(Nodo nodo)
+        {
+            if (nodo.Direcciones1[0] == 1340 || nodo.Direcciones1[1] == 1340 || nodo.Direcciones1[2] == 1340 || nodo.Direcciones1[3] == 1340 ||
+                nodo.Direcciones1[4] == 1340)
+            {
+            }
+            int v1, v2;
+            long d1, d2, d3;
+            v1 = nodo.Claves1[4];
+            v2 = nodo.Claves1[3];
+            d1 = nodo.Direcciones1[3];
+            d2 = nodo.Direcciones1[4];
+            d3 = nodo.Direcciones1[5];
+            AgregaIntermedio(v1, d1, d3, fs.Length);
+            InsertaARI(tree.I1[tree.I1.Count - 1], v2, d2);
+            fs.Seek(tree.I1[tree.I1.Count - 1].DirNodo1, SeekOrigin.Begin);
+            bw = new BinaryWriter(fs);
+            tree.I1[tree.I1.Count - 1].EscribeNodo(bw);
+        }
+
+        //Método para agregar nodos intermedios
+        public void AgregaIntermedio(int v, long d1, long d2, long final)
+        {
+            Nodo Aux = new Nodo(final, 'I');
+            Aux.InicializaListas();
+            Aux.Claves1[0] = v;
+            Aux.Direcciones1[0] = d1;
+            Aux.Direcciones1[1] = d2;
+            tree.I1.Add(Aux);
+            tree.LNodos1.Add(Aux);
+        }
+
+        //Método para buscar el nodo con la dirección
+        public Nodo BuscaNodo(long dir)
+        {
+            Nodo n = null;
+            if(dir == 1340)
+            {
+
+            }
+            foreach (Nodo aux in tree.LNodos1)
+            {
+                if (aux.TipoNodo1 == 'H')
+                {
+                    if (aux.DirNodo1 == dir)
+                    {
+                        n = aux;
+                        break;
+                    }
+                }
+                else if (aux.TipoNodo1 == 'I')
+                {
+                    if (aux.DirNodo1 == dir)
+                    {
+                        n = aux;
+                        break;
+                    }
+                }
+            }
+            return n;
+        }
+        //Método para buscar la dirección de la hoja en la raíz
+        public long BuscaDHoja(int valor, Nodo R)
         {
             long dir = -1;
-            //Ciclo que busca la raíz 
-            for (int i = 0; i < Nodos.Count; i++)
+            
+            if (valor > R.Claves1[3])
+                dir = R.Direcciones1[4];
+            else
             {
-                Nodo n = Nodos[i];
-                if (n.TipoNodo1 == 'R')
+                for (int i = 0; i < R.Claves1.Count - 1; i++)
                 {
-                    for (int j = 0; j < n.Claves1.Count - 1; j++)
+                    if (R.Claves1[i] > valor)
                     {
-                        int cb = n.Claves1[j];
-                        if (cb != int.MaxValue)
-                        {
-                            if (valor < cb)
-                                dir = n.Direcciones1[j];
-                            else if (valor > cb && valor < n.Claves1[j + 1])
-                                dir = n.Direcciones1[j + 1];
-                        }
-                        else
-                        {
-                            dir = n.Direcciones1[j];
-                            break;
-                        }
+                        dir = R.Direcciones1[i];
+                        break;
+                    }
+                    else if (valor > R.Claves1[i] && valor < R.Claves1[i + 1])
+                    {
+                        dir = R.Direcciones1[i + 1];
+                        break;
                     }
                 }
             }
             return dir;
         }
+        public void CreaHoja(Nodo nodo)
+        {
+            int v1, v2, v3;
+            long d1, d2, d3;
+            v1 = nodo.Claves1[4];
+            v2 = nodo.Claves1[3];
+            v3 = nodo.Claves1[2];
+            d1 = nodo.Direcciones1[4];
+            d2 = nodo.Direcciones1[3];
+            d3 = nodo.Direcciones1[2];
+            AgregaHoja(v1, d1, fs.Length);
+            InsertaValor(tree.H1[tree.H1.Count - 1], v2, d2);
+            InsertaValor(tree.H1[tree.H1.Count - 1], v3, d3);
+            fs.Seek(tree.H1[tree.H1.Count - 1].DirNodo1, SeekOrigin.Begin);
+            bw = new BinaryWriter(fs);
+            tree.H1[tree.H1.Count - 1].EscribeNodo(bw);
 
-        //Copia los valores del nodo auxiliar al nuevo nodo
-        public void CopiaValores(Nodo nuevo, Nodo aux)
+
+        }
+
+        //Método para ua hoja al árbol
+        public void AgregaHoja(int v1, long d1, long dir)
         {
-            for(int i = 0; i < nuevo.Claves1.Count-1; i++)
+            Nodo Aux = new Nodo(dir, 'H');
+            Aux.InicializaListas();
+            Aux.Claves1[0] = v1;
+            Aux.Direcciones1[0] = d1;
+            tree.H1.Add(Aux);
+            tree.LNodos1.Add(Aux);
+        }
+
+        //Método para insertar valores a una hoja existente
+        public void InsertaValor(Nodo hoja, int v, long d)
+        {
+            for (int i = 0; i < hoja.Claves1.Count; i++)
             {
-                nuevo.Claves1[i] = aux.Claves1[i + 1];
-                nuevo.Direcciones1[i] = aux.Direcciones1[i + 1];
+                if (hoja.Claves1[i] == int.MaxValue)
+                {
+                    hoja.Claves1[i] = v;
+                    i = hoja.Claves1.Count;
+                }
+                else if (i == 3 && hoja.Claves1[i] != int.MaxValue)
+                {
+                    hoja.Claves1.Add(v);
+                }
+            }
+            for (int i = 0; i < hoja.Direcciones1.Count; i++)
+            {
+                if (hoja.Direcciones1[i] == -1)
+                {
+                    hoja.Direcciones1[i] = d;
+                    i = hoja.Direcciones1.Count;
+                }
             }
         }
-        //Borra los valores cuando ya está llena la hoja
-        public void BorrarValores(Nodo n)
+
+        //Método para borrar los valores que se pasaron a otro nodo
+        public void BorraValores(Nodo n)
         {
-            for(int i = 1; i < n.Claves1.Count; i++)
-            {
-                n.Claves1[i] = int.MaxValue;
-                n.Direcciones1[i] = -1;
-            }
-        }
-        //  Inserta los valores a una hoja
-        public void InsertaEnHoja(Nodo n, int v,long DR,int pos)
-        {
-            n.Claves1[pos] = v;
-            int auxCB, i = -1;
-            long auxDir;
             if (n.TipoNodo1 == 'H')
             {
-                n.Direcciones1[pos] = DR;
-                for (int j = 1; j < n.Claves1.Count; j++)
-                {
-                    auxCB = n.Claves1[j];
-                    auxDir = n.Direcciones1[j];
-                    i = j - 1;
-                    while (i > -1 && n.Claves1[i] > auxCB)
-                    {
-                        n.Claves1[i + 1] = n.Claves1[i];
-                        n.Direcciones1[i + 1] = n.Direcciones1[i];
-                        i = i - 1;
-                    }
-                    n.Claves1[i + 1] = auxCB;
-                    n.Direcciones1[i + 1] = auxDir;
-                }
+                n.Claves1.RemoveAt(4);
+                n.Claves1[3] = int.MaxValue;
+                n.Claves1[2] = int.MaxValue;
+                n.Direcciones1[4] = -1;
+                n.Direcciones1[3] = -1;
+                n.Direcciones1[2] = -1;
             }
             else
             {
-                n.Direcciones1[pos+1] = DR;
-                for (int j = 1; j < n.Claves1.Count; j++)
-                {
-                    auxCB = n.Claves1[j];
-                    auxDir = n.Direcciones1[j];
-                    i = j - 1;
-                    while (i > -1 && n.Claves1[i] > auxCB)
-                    {
-                        n.Claves1[i + 1] = n.Claves1[i];
-                        n.Direcciones1[i + 1] = n.Direcciones1[i];
-                        i = i - 1;
-                    }
-                    n.Claves1[i + 1] = auxCB;
-                    n.Direcciones1[i + 1] = auxDir;
-                }
+                n.Claves1.RemoveAt(4);
+                n.Claves1[3] = int.MaxValue;
+                n.Claves1[2] = int.MaxValue;
+                n.Direcciones1.RemoveAt(5);
+                n.Direcciones1[4] = -1;
+                n.Direcciones1[3] = -1;
             }
+
         }
 
-        public void InsertaEnPadre(Nodo n, int menor, Nodo nuevo)
+        //Método para ordenar los valores de las hojas
+        public void OrdenaValores(Nodo n)
         {
-            bw = new BinaryWriter(fs);
-            if(n.TipoNodo1 == 'R')
+            int aux1;
+            long auxd1;
+            if (n.TipoNodo1 == 'H')
             {
-                n.TipoNodo1 = 'H';
-                Nodo NodoRaiz = new Nodo(fs.Length, 'R');
-                NodoRaiz.InicializaListas();
-                for (int i = 0; i < NodoRaiz.Direcciones1.Count; i++)
-                    if (NodoRaiz.Direcciones1[i] == -1)
-                    {
-                        NodoRaiz.Direcciones1[i] = n.DirNodo1;
-                        break;
-                    }
-                tree.LNodos1.Add(NodoRaiz);
-                NodoRaiz.EscribeNodo(bw);
-            }
-            Nodo Padre = EncuentraPadre(n);
-            for (int i = 0; i < Padre.Direcciones1.Count; i++)
-            {
-                if (Padre.Direcciones1[i] != -1)
+                for (int i = 0; i < n.Claves1.Count; i++)
                 {
-                    fs.Close();
-                    Inserta(menor.ToString(), nuevo.DirNodo1);
-                    i = Padre.Direcciones1.Count;
-                }
-
-            }
-        }
-
-        //Método que busca el nodo padre del nodo que se manda 
-        public Nodo EncuentraPadre(Nodo n)
-        {
-            Nodo p = new Nodo(-1,'H');
-            for(int i = 0; i < tree.LNodos1.Count; i++)
-            {
-                Nodo aux = tree.LNodos1[i];
-                if (aux.TipoNodo1 != 'H')
-                {
-                    for (int j = 0; j < aux.Direcciones1.Count; j++)
+                    for (int j = 0; j < n.Claves1.Count - 1; j++)
                     {
-                        long auxd = aux.Direcciones1[j];
-                        if (auxd == n.DirNodo1)
+                        if (n.Claves1[j] > n.Claves1[j + 1] && n.Claves1[i] != int.MaxValue)
                         {
-                            p = aux;
-                            break;
+                            aux1 = n.Claves1[j];
+                            n.Claves1[j] = n.Claves1[j + 1];
+                            n.Claves1[j + 1] = aux1;
+
+                            auxd1 = n.Direcciones1[j];
+                            n.Direcciones1[j] = n.Direcciones1[j + 1];
+                            n.Direcciones1[j + 1] = auxd1;
                         }
                     }
                 }
             }
-            return p;
+            else
+            {
+                for (int i = 0; i < n.Claves1.Count; i++)
+                {
+                    for (int j = 0; j < n.Claves1.Count - 1; j++)
+                    {
+                        if (n.Claves1[j] > n.Claves1[j + 1] && n.Claves1[i] != int.MaxValue)
+                        {
+                            aux1 = n.Claves1[j];
+                            n.Claves1[j] = n.Claves1[j + 1];
+                            n.Claves1[j + 1] = aux1;
+
+                            auxd1 = n.Direcciones1[j + 1];
+                            n.Direcciones1[j + 1] = n.Direcciones1[j + 2];
+                            n.Direcciones1[j + 2] = auxd1;
+                        }
+                    }
+                }
+            }
+            fs.Seek(n.DirNodo1, SeekOrigin.Begin);
+            bw = new BinaryWriter(fs);
+            n.EscribeNodo(bw);
         }
-        //Se busca la posición de la cb mayor
-        public int EncuentraM(Nodo n)
+
+        //Método para crea una ráiz 
+        public void CreaRaiz(long DA, int menor, long nuevo)
         {
-            int m = 0, pos = -1;
+            Nodo R = new Nodo(fs.Length, 'R');
+            R.InicializaListas();
+            R.Direcciones1[0] = DA;
+            InsertaARI(R, menor, nuevo);
+            cabAr = R.DirNodo1;
+            fs.Seek(fs.Length, SeekOrigin.Begin);
+            bw = new BinaryWriter(fs);
+            R.EscribeNodo(bw);
+            tree.Raiz1 = R;
+            tree.LNodos1.Add(R);
+        }
+
+        //Método para insertar valores a intermedio o raíz
+        public void InsertaARI(Nodo n, int menor, long nuevo)
+        {
             for (int i = 0; i < n.Claves1.Count; i++)
-                if (n.Claves1[i]!= int.MaxValue && n.Claves1[i] > m)
-                    pos = i;
-            return pos;
+            {
+                if (n.Claves1[i] == int.MaxValue)
+                {
+                    n.Claves1[i] = menor;
+                    i = n.Claves1.Count;
+                }
+                else if (i == 3 && n.Claves1[i] != int.MaxValue)
+                {
+                    n.Claves1.Add(menor);
+                }
+            }
+            for (int i = 1; i < n.Direcciones1.Count; i++)
+            {
+                if (n.Direcciones1[i] == -1)
+                {
+                    n.Direcciones1[i] = nuevo;
+                    i = n.Direcciones1.Count;
+                }
+                else if (i == 4 && n.Direcciones1[i] != -1)
+                    n.Direcciones1.Add(nuevo);
+            }
         }
         public void MuestraArbol()
         {
             DGArbol.Rows.Clear();
+            tree.LNodos1 = tree.LNodos1.OrderBy(o => o.DirNodo1).ToList();
             for (int i = 0; i < tree.LNodos1.Count; i++)
             {
                 Nodo nd = tree.LNodos1[i];
@@ -1317,16 +1630,38 @@ namespace Archivos
                 DGArbol.Rows[n].Cells[10].Value = nd.Direcciones1[4];
 
             }
+            label3.Text = tree.LNodos1.Count.ToString();
         }
-            #endregion
+        #endregion
 
 
-            //Evento para crear el archivo de datos y el de índices si existe
-            private void cargarToolStripMenuItem_Click(object sender, EventArgs e)
+        //Evento para crear el archivo de datos y el de índices si existe
+        private void cargarToolStripMenuItem_Click(object sender, EventArgs e)
         {
             CreaColumnas();
             LlenaCB();
         }
+        /*public void LeeTodo(Nodo N)
+        {
+            for (int i = 0; i < N.Direcciones1.Count; i++)
+            {
+                if (N.Direcciones1[i] != -1)
+                {
+                    FA.Seek(N.Direcciones1[i], SeekOrigin.Begin);
+                    br = new BinaryReader(FA);
+                    if (!In.Ar1.LeeNodo(br, ref AInterm))
+                    {
+                        LeeTodo(AInterm);
+                    }
+                    else
+                    {
+                        if (i == 4)
+                            return;
+                    }
+
+                }
+            }
+        }*/
+        #endregion
     }
-    #endregion
 }

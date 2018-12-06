@@ -32,7 +32,7 @@ namespace Archivos
             if(TDato == 'E')
             {
                 int n = int.MaxValue;
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < 200; i++)
                 {
                     string valor = n.ToString();
                     BloquePrincipal b = new BloquePrincipal(valor);
@@ -43,7 +43,7 @@ namespace Archivos
             }
             if(TDato == 'C')
             {
-                for(int i = 0; i < 100; i++)
+                for(int i = 0; i < 200; i++)
                 {
                     tam = t;
                     string valor = "";

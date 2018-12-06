@@ -717,6 +717,10 @@ namespace Archivos
                                     a.DI = s.TamPrin1;
                             }
                         }
+                        if (a.TI == 4)
+                        {
+                            a.DI = reg.CabAr;
+                        }
                     }
                     //AgregaAtribDG();
                     //AgregaFila();
